@@ -3,9 +3,10 @@ package xerror
 import (
 	"errors"
 	"fmt"
-	"go.olapie.com/x/xconv"
 	"net/http"
 	"reflect"
+
+	"go.olapie.com/x/xconv"
 )
 
 type String string
@@ -13,6 +14,10 @@ type String string
 func (s String) Error() string {
 	return string(s)
 }
+
+const (
+	DBNoRecord String = "database: no records"
+)
 
 type APIError struct {
 	Code    int    `json:"code,omitempty"`

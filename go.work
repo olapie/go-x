@@ -6,15 +6,16 @@ use (
 	./xcontext
 	./xconv
 	./xerror
+	./xgrpc
 	./xhttp
 	./xhttpheader
+	./xjwt
 	./xlog
 	./xmime
 	./xsecurity
 	./xsession
+	./xsql
 	./xtest
 	./xtype
 	./xurl
-	./xjwt
-	./xgrpc
 )
