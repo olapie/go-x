@@ -1,7 +1,7 @@
 package xtype
 
 type Audio struct {
-	Url      string `json:"url,omitempty"`
+	URL      string `json:"url,omitempty"`
 	Format   string `json:"format,omitempty"`
 	Duration int32  `json:"duration,omitempty"`
 	Size     int32  `json:"size,omitempty"`
@@ -10,7 +10,7 @@ type Audio struct {
 }
 
 type Image struct {
-	Url       string `json:"url,omitempty"`
+	URL       string `json:"url,omitempty"`
 	Width     int32  `json:"width,omitempty"`
 	Height    int32  `json:"height,omitempty"`
 	Format    string `json:"format,omitempty"`
@@ -21,7 +21,7 @@ type Image struct {
 }
 
 type Video struct {
-	Url      string `json:"url,omitempty"`
+	URL      string `json:"url,omitempty"`
 	Format   string `json:"format,omitempty"`
 	Duration int32  `json:"duration,omitempty"`
 	Size     int32  `json:"size,omitempty"`
@@ -38,4 +38,19 @@ type PhotoID struct {
 	IssueTime  int64  `json:"issue_time,omitempty"`
 	ExpireTime int64  `json:"expire_time,omitempty"`
 	Verified   bool   `json:"verified,omitempty"`
+}
+
+type File struct {
+	URL    string `json:"url,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Size   int32  `json:"size,omitempty"`
+	Format string `json:"format,omitempty"`
+	Data   []byte `json:"data,omitempty"`
+}
+
+type WebPage struct {
+	Title   string `json:"title,omitempty"`
+	Summary string `json:"summary,omitempty"`
+	Image   *Image `json:"image,omitempty"`
+	URL     string `json:"url,omitempty"`
 }
