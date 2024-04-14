@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/textproto"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -31,6 +32,11 @@ type Activity struct {
 	userID  xtype.UserIDInterface
 }
 
+var (
+	typeMapStringToStringSlice = reflect.TypeOf(map[string][]string(nil))
+	typeMapStringToString      = reflect.TypeOf(map[string]string(nil))
+)
+
 func NewActivity[H HeaderTypes](name string, header H) *Activity {
 	a := &Activity{
 		name: name,
@@ -45,7 +51,14 @@ func NewActivity[H HeaderTypes](name string, header H) *Activity {
 	} else if hs, ok := any(header).(map[string]string); ok {
 		a.headersSingle = hs
 	} else {
-		panic(fmt.Sprintf("unsupported header type: %T", header))
+		hv := reflect.ValueOf(header)
+		if hv.CanConvert(typeMapStringToStringSlice) {
+			a.headersMulti = hv.Convert(typeMapStringToStringSlice).Interface().(map[string][]string)
+		} else if hv.CanConvert(typeMapStringToString) {
+			a.headersSingle = hv.Convert(typeMapStringToString).Interface().(map[string]string)
+		} else {
+			panic(fmt.Sprintf("unsupported header type: %T", header))
+		}
 	}
 	return a
 }
