@@ -23,9 +23,8 @@ type HeaderTypes interface {
 }
 
 type Activity struct {
-	name          string
-	headersMulti  map[string][]string
-	headersSingle map[string]string
+	name   string
+	header map[string][]string
 
 	//Session is only available in incoming context, may be nil if session is not enabled
 	session *xsession.Session
@@ -39,26 +38,21 @@ var (
 
 func NewActivity[H HeaderTypes](name string, header H) *Activity {
 	a := &Activity{
-		name: name,
+		name:   name,
+		header: make(map[string][]string),
 	}
 
 	if header == nil {
 		panic("header is nil")
 	}
 
-	if hm, ok := any(header).(map[string][]string); ok {
-		a.headersMulti = hm
-	} else if hs, ok := any(header).(map[string]string); ok {
-		a.headersSingle = hs
+	hv := reflect.ValueOf(header)
+	if hv.CanConvert(typeMapStringToStringSlice) {
+		a.header = copyHeader(hv.Convert(typeMapStringToStringSlice).Interface().(map[string][]string))
+	} else if hv.CanConvert(typeMapStringToString) {
+		a.header = copyHeader(hv.Convert(typeMapStringToString).Interface().(map[string]string))
 	} else {
-		hv := reflect.ValueOf(header)
-		if hv.CanConvert(typeMapStringToStringSlice) {
-			a.headersMulti = hv.Convert(typeMapStringToStringSlice).Interface().(map[string][]string)
-		} else if hv.CanConvert(typeMapStringToString) {
-			a.headersSingle = hv.Convert(typeMapStringToString).Interface().(map[string]string)
-		} else {
-			panic(fmt.Sprintf("unsupported header type: %T", header))
-		}
+		panic(fmt.Sprintf("unsupported header type: %T", header))
 	}
 	return a
 }
@@ -81,11 +75,7 @@ func (a *Activity) SetUserID(id xtype.UserIDInterface) {
 
 func (a *Activity) Set(key string, value string) {
 	key = strings.ToLower(key)
-	if a.headersMulti != nil {
-		a.headersMulti[key] = append(a.headersMulti[key], value)
-	} else {
-		a.headersSingle[key] = value
-	}
+	a.header[key] = append(a.header[key], value)
 }
 
 func (a *Activity) Get(key string) string {
@@ -105,16 +95,9 @@ func (a *Activity) Get(key string) string {
 }
 
 func (a *Activity) get(key string) string {
-	if a.headersMulti != nil {
-		l := a.headersMulti[key]
-		if len(l) != 0 {
-			return l[0]
-		}
-		return ""
-	}
-
-	if v, ok := a.headersSingle[key]; ok {
-		return v
+	v, _ := a.header[strings.ToLower(key)]
+	if len(v) > 0 {
+		return v[0]
 	}
 	return ""
 }
@@ -171,33 +154,67 @@ func (a *Activity) SetRequestTimeout(seconds int) {
 }
 
 func CopyActivityHeader[H HeaderTypes](dest H, a *Activity) {
-	if hm, ok := any(dest).(map[string][]string); ok {
-		if a.headersMulti != nil {
-			for k, v := range a.headersMulti {
-				hm[k] = v
-			}
-		} else {
-			for k, v := range a.headersSingle {
-				hm[k] = append(hm[k], v)
+
+	if setter, ok := any(dest).(interface {
+		Set(key string, values ...string)
+	}); ok {
+		for k, v := range a.header {
+			setter.Set(k, v...)
+		}
+		return
+	}
+
+	if setter, ok := any(dest).(interface {
+		Set(key string, values []string)
+	}); ok {
+		for k, v := range a.header {
+			setter.Set(k, v)
+		}
+		return
+	}
+
+	if setter, ok := any(dest).(interface {
+		Set(key string, value string)
+	}); ok {
+		for k, v := range a.header {
+			if len(v) > 0 {
+				setter.Set(k, v[0])
 			}
 		}
 		return
 	}
 
+	if hm, ok := any(dest).(map[string][]string); ok {
+		for k, v := range a.header {
+			hm[k] = v
+		}
+		return
+	}
+
 	if hs, ok := any(dest).(map[string]string); ok {
-		if a.headersMulti != nil {
-			for k, v := range a.headersMulti {
-				if len(v) != 0 {
-					hs[k] = v[0]
-				}
-			}
-		} else {
-			for k, v := range a.headersSingle {
-				hs[k] = v
+		for k, v := range a.header {
+			if len(v) != 0 {
+				hs[k] = v[0]
 			}
 		}
 		return
 	}
 
 	panic(fmt.Sprintf("unsupported header type: %T", dest))
+}
+
+func copyHeader[H map[string][]string | map[string]string](h H) map[string][]string {
+	res := make(map[string][]string, len(h))
+	if m, ok := any(h).(map[string][]string); ok {
+		for k, v := range m {
+			res[strings.ToLower(k)] = v
+		}
+		return res
+	}
+
+	m := any(h).(map[string]string)
+	for k, v := range m {
+		res[strings.ToLower(k)] = []string{v}
+	}
+	return res
 }

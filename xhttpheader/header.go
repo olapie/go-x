@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"mime"
 	"net/http"
+	"net/textproto"
 	"reflect"
 	"strconv"
 	"strings"
@@ -85,9 +86,21 @@ type HeaderTypes interface {
 
 func Get[H HeaderTypes](h H, key string) string {
 	v := get(h, key)
+
 	if v == "" {
-		v = get(h, strings.ToLower(key))
+		lowerKey := strings.ToLower(key)
+		if lowerKey != key {
+			v = get(h, lowerKey)
+		}
 	}
+
+	if v == "" {
+		ck := textproto.CanonicalMIMEHeaderKey(key)
+		if ck != key {
+			v = get(h, ck)
+		}
+	}
+
 	return v
 }
 
@@ -96,7 +109,11 @@ func get[H HeaderTypes](h H, key string) string {
 	case map[string]string:
 		return m[key]
 	case map[string][]string:
-		return http.Header(m).Get(key)
+		l := m[key]
+		if len(l) > 0 {
+			return l[0]
+		}
+		return ""
 	case http.Header:
 		return m.Get(key)
 	default:
@@ -104,30 +121,50 @@ func get[H HeaderTypes](h H, key string) string {
 		if v.CanConvert(MapStringToStringType) {
 			return v.Convert(MapStringToStringType).Interface().(map[string]string)[key]
 		} else if v.CanConvert(MapStringToStringSliceType) {
-			return http.Header(v.Convert(MapStringToStringSliceType).Interface().(map[string][]string)).Get(key)
+			m := v.Convert(MapStringToStringSliceType).Interface().(map[string][]string)
+			l := m[key]
+			if len(l) > 0 {
+				return l[0]
+			}
+			return ""
 		}
 		panic(fmt.Sprintf("unsupported type %T", h))
 	}
 }
 
 func Set[H HeaderTypes](h H, key, value string) {
-	switch m := any(h).(type) {
-	case map[string]string:
-		m[key] = value
-	case map[string][]string:
-		hh := http.Header(m)
-		hh.Set(key, value)
-	case http.Header:
-		m.Set(key, value)
-	default:
-		v := reflect.ValueOf(h)
-		if v.CanConvert(MapStringToStringType) {
-			v.Convert(MapStringToStringType).Interface().(map[string]string)[key] = value
-		} else if v.CanConvert(MapStringToStringSliceType) {
-			http.Header(v.Convert(MapStringToStringSliceType).Interface().(map[string][]string)).Set(key, value)
-		}
-		panic(fmt.Sprintf("unsupported type %T", h))
+	if setter, ok := any(h).(interface {
+		Set(key string, values ...string)
+	}); ok {
+		setter.Set(key, value)
+		return
 	}
+
+	if setter, ok := any(h).(interface {
+		Set(key string, values []string)
+	}); ok {
+		setter.Set(key, []string{value})
+		return
+	}
+
+	if setter, ok := any(h).(interface {
+		Set(key string, value string)
+	}); ok {
+		setter.Set(key, value)
+		return
+	}
+
+	if m, ok := any(h).(map[string][]string); ok {
+		m[key] = []string{value}
+		return
+	}
+
+	if m, ok := any(h).(map[string]string); ok {
+		m[key] = value
+		return
+	}
+
+	panic(fmt.Sprintf("xhttpheader.Set: unsupported type: %T", h))
 }
 
 func SetNX[H HeaderTypes](h H, key, value string) {

@@ -19,7 +19,7 @@ func SignRequest(req *http.Request, createAPIKey func(h http.Header)) {
 	if traceID := xhttpheader.GetTraceID(req.Header); traceID == "" {
 		if traceID == "" {
 			traceID = xbase62.NewUUIDString()
-			xlog.FromContext(req.Context()).Info("generated trace id " + traceID)
+			xlog.FromContext(req.Context()).Info("xhttp.SignRequest: generated trace id " + traceID)
 		}
 		xhttpheader.SetTraceID(req.Header, traceID)
 	}

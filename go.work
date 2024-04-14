@@ -1,6 +1,7 @@
 go 1.22.0
 
 use (
+	./xapp
 	./xbase36
 	./xbase62
 	./xcontext

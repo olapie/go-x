@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"time"
 
-	"go.olapie.com/x/xbase62"
 	"go.olapie.com/x/xcontext"
 	"go.olapie.com/x/xerror"
 	"go.olapie.com/x/xlog"
@@ -27,7 +26,7 @@ func ServerStart(ctx context.Context,
 	authenticate func(ctx context.Context, md metadata.MD) *xtype.AuthResult) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return ctx, status.Error(codes.InvalidArgument, "failed reading request metadata")
+		return ctx, status.Error(codes.InvalidArgument, "failed to read request metadata")
 	}
 
 	a := xcontext.NewActivity(info.FullMethod, md)
@@ -39,8 +38,7 @@ func ServerStart(ctx context.Context,
 	ctx = xcontext.WithIncomingActivity(ctx, a)
 	traceID := a.GetTraceID()
 	if traceID == "" {
-		traceID = xbase62.NewUUIDString()
-		a.SetTraceID(traceID)
+		return ctx, status.Error(codes.InvalidArgument, "missing x-trace-id")
 	}
 	logger := xlog.FromContext(ctx).With(slog.String("traceId", traceID))
 	ctx = xlog.NewContext(ctx, logger)
@@ -63,7 +61,7 @@ func ServerStart(ctx context.Context,
 			}
 		}
 		logger.Error("invalid api key", slog.Any("metadata", md))
-		return ctx, status.Error(codes.InvalidArgument, "failed verifying")
+		return ctx, status.Error(codes.InvalidArgument, "failed to verify api key")
 	}
 
 	auth := authenticate(ctx, md)

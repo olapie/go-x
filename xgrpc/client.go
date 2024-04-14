@@ -56,16 +56,16 @@ func signClientContext(ctx context.Context, createAPIKey func(md metadata.MD)) c
 
 	a := xcontext.GetOutgoingActivity(ctx)
 	if a != nil {
-		xcontext.CopyActivityHeader(map[string][]string(md), a)
+		xcontext.CopyActivityHeader(md, a)
 	} else {
 		xlog.FromContext(ctx).Warn("no outgoing context")
 	}
 	if traceID := xhttpheader.GetTraceID(md); traceID == "" {
 		if traceID == "" {
 			traceID = xbase62.NewUUIDString()
-			xlog.FromContext(ctx).Info("generated trace id " + traceID)
+			xlog.FromContext(ctx).Info("xgrpc.signClientContext: generated trace id " + traceID)
 		}
-		xhttpheader.SetTraceID(map[string][]string(md), traceID)
+		xhttpheader.SetTraceID(md, traceID)
 	}
 	createAPIKey(md)
 	return metadata.NewOutgoingContext(ctx, md)
