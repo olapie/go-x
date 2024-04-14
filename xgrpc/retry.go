@@ -3,12 +3,12 @@ package xgrpc
 import (
 	"context"
 	"errors"
-	"go.olapie.com/x/xlog"
 	"log/slog"
 	"time"
 
-	"go.olapie.com/ola/activity"
-	"go.olapie.com/ola/errorutil"
+	"go.olapie.com/x/xcontext"
+	"go.olapie.com/x/xerror"
+	"go.olapie.com/x/xlog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
@@ -87,9 +87,9 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 				return out, err
 			}
 
-			act := activity.FromOutgoingContext(ctx)
+			act := xcontext.GetOutgoingActivity(ctx)
 			if act == nil {
-				return out, errorutil.BadRequest("no outgoing context")
+				return out, xerror.BadRequest("no outgoing context")
 			}
 			act.SetAuthorization(accessToken)
 		default:

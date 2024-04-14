@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"go.olapie.com/x/xbase62"
 	"go.olapie.com/x/xcontext"
+	"go.olapie.com/x/xerror"
 	"go.olapie.com/x/xlog"
+	"go.olapie.com/x/xtype"
 	"log/slog"
 	"reflect"
 	"time"
 
-	"go.olapie.com/ola/errorutil"
-	"go.olapie.com/ola/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -23,7 +23,7 @@ var metadataKeysForLogging = []string{"x-client-id", "x-app-id"}
 func ServerStart(ctx context.Context,
 	info *grpc.UnaryServerInfo,
 	verifyAPIKey func(ctx context.Context, md metadata.MD) bool,
-	authenticate func(ctx context.Context, md metadata.MD) *types.Auth) (context.Context, error) {
+	authenticate func(ctx context.Context, md metadata.MD) *xtype.AuthResult) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return ctx, status.Error(codes.InvalidArgument, "failed reading request metadata")
@@ -88,7 +88,12 @@ func ServerFinish(resp any, err error, logger *slog.Logger, startAt time.Time) (
 		return nil, err
 	}
 
-	if s := errorutil.GetCode(err); s >= 100 && s < 600 {
+	if s, ok := status.FromError(err); ok {
+		logger.Error("END", slog.Any("status", s), xlog.Err(err))
+		return nil, err
+	}
+
+	if s := xerror.GetCode(err); s >= 100 && s < 600 {
 		code := HTTPStatusToCode(s)
 		logger.Info("END", slog.Int("status", s), slog.Int("code", int(code)), xlog.Err(err))
 		return nil, status.Error(code, err.Error())
