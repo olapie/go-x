@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"go.olapie.com/naming"
-	"go.olapie.com/x/xconv"
 	"log"
 	"reflect"
 	"strings"
+
+	"go.olapie.com/naming"
+	"go.olapie.com/x/xconv"
 )
 
 type tableNamer interface {

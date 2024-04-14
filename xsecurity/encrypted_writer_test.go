@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"go.olapie.com/security/internal/testutil"
+	"go.olapie.com/x/xtest"
 )
 
 func TestEncryptedWriter(t *testing.T) {
@@ -14,9 +14,9 @@ func TestEncryptedWriter(t *testing.T) {
 	enc := &bytes.Buffer{}
 	w := NewEncryptedWriter(enc, "123")
 	n, err := io.Copy(w, bytes.NewReader(raw))
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 	t.Log(n)
 	data, err := Encrypt(raw, "123")
-	testutil.NoError(t, err)
-	testutil.Equal(t, enc.Bytes(), data)
+	xtest.NoError(t, err)
+	xtest.Equal(t, enc.Bytes(), data)
 }

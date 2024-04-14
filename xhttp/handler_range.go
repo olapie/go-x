@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go.olapie.com/x/xerror"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
 	"strconv"
 	"strings"
+
+	"go.olapie.com/x/xerror"
 )
 
 type Content interface {

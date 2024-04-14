@@ -2,10 +2,11 @@ package xhttp
 
 import (
 	"encoding/json"
-	"go.olapie.com/x/xlog"
 	"io"
 	"log/slog"
 	"net/http"
+
+	"go.olapie.com/x/xlog"
 )
 
 func ReadJSONBody(rw http.ResponseWriter, req *http.Request, ptrToModel any) bool {

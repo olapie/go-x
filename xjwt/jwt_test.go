@@ -4,9 +4,10 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"go.olapie.com/x/xtest"
 	"testing"
 	"time"
+
+	"go.olapie.com/x/xtest"
 
 	"github.com/google/uuid"
 )

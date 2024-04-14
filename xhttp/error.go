@@ -2,11 +2,12 @@ package xhttp
 
 import (
 	"encoding/json"
-	"go.olapie.com/x/xerror"
 	"io"
 	"log"
 	"net/http"
 	"strings"
+
+	"go.olapie.com/x/xerror"
 )
 
 func ReadError(resp *http.Response) error {

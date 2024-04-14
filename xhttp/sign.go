@@ -1,11 +1,12 @@
 package xhttp
 
 import (
+	"net/http"
+
 	"go.olapie.com/x/xbase62"
 	"go.olapie.com/x/xcontext"
 	"go.olapie.com/x/xhttpheader"
 	"go.olapie.com/x/xlog"
-	"net/http"
 )
 
 func SignRequest(req *http.Request, createAPIKey func(h http.Header)) {

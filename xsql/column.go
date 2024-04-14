@@ -1,12 +1,13 @@
 package xsql
 
 import (
-	"go.olapie.com/naming"
 	"reflect"
 	"regexp"
 	"strings"
 	"sync"
 	"unsafe"
+
+	"go.olapie.com/naming"
 )
 
 var _regexpVariable = regexp.MustCompile("^[_a-zA-Z]\\w*$")

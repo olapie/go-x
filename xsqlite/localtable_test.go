@@ -3,11 +3,12 @@ package sqlitex
 import (
 	"context"
 	"fmt"
-	"go.olapie.com/x/xtest"
 	"math/rand"
 	"os"
 	"testing"
 	"time"
+
+	"go.olapie.com/x/xtest"
 
 	"github.com/google/uuid"
 )
