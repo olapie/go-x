@@ -2,9 +2,8 @@ package xhttp
 
 import (
 	"net/http"
+	"reflect"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestToMap(t *testing.T) {
@@ -14,9 +13,9 @@ func TestToMap(t *testing.T) {
 		h.Set("k2", "v2")
 		h.Add("k2", "v22")
 		m := ToMapAny(h)
-		diff := cmp.Diff(map[string]any{"K1": "v1", "K2": []string{"v2", "v22"}}, m)
-		if diff != "" {
-			t.Fatal(diff)
+		expected := map[string]any{"K1": "v1", "K2": []string{"v2", "v22"}}
+		if !reflect.DeepEqual(expected, m) {
+			t.Fatalf("expect %v, got %v", expected, m)
 		}
 	})
 }
