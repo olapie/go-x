@@ -1,11 +1,13 @@
 module go.olapie.com/x/xsecurity
 
-go 1.20
+go 1.22.0
 
 require (
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.6.0
 	go.olapie.com/security v0.2.2
-	golang.org/x/crypto v0.15.0
+	go.olapie.com/x/xbase62 v0.1.0
+	go.olapie.com/x/xtest v0.1.0
+	golang.org/x/crypto v0.22.0
 )
 
-require golang.org/x/sys v0.14.0 // indirect
+require golang.org/x/sys v0.19.0 // indirect

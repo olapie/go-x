@@ -16,4 +16,5 @@ use (
 	./xtype
 	./xurl
 	./xjwt
+	./xgrpc
 )
