@@ -5,7 +5,7 @@ go 1.22.0
 require (
 	go.olapie.com/x/xerror v0.1.0
 	go.olapie.com/x/xhttpheader v0.1.0
-	go.olapie.com/x/xsession v0.1.0
+	go.olapie.com/x/xsession v0.1.1
 	go.olapie.com/x/xtype v0.1.0
 )
 
