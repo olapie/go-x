@@ -15,6 +15,7 @@ use (
 	./xsecurity
 	./xsession
 	./xsql
+	./xsqlite
 	./xtest
 	./xtype
 	./xurl

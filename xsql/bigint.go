@@ -1,4 +1,4 @@
-package sqlutil
+package xsql
 
 import (
 	"database/sql"

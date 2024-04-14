@@ -1,4 +1,4 @@
-package sqlutil
+package xsql
 
 import (
 	"go.olapie.com/naming"
