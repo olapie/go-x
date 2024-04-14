@@ -3,15 +3,17 @@ go 1.22.0
 use (
 	./xbase36
 	./xbase62
-	./xconv
 	./xcontext
+	./xconv
 	./xerror
 	./xhttp
 	./xhttpheader
 	./xlog
 	./xmime
-	./xurl
+	./xsecurity
+	./xsession
 	./xtest
 	./xtype
-	./xsession
+	./xurl
+	./xjwt
 )
