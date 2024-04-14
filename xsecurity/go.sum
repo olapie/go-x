@@ -1,7 +1,5 @@
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-go.olapie.com/security v0.2.2 h1:A8A07Nf9ikzZssCWPf5fZF6k2QPsh4Rbtg5Bb+jZWrY=
-go.olapie.com/security v0.2.2/go.mod h1:NvOu7H7TFc2TBMLKroaagYzPSU8ztTCFvQbRDBD3ZtI=
 go.olapie.com/x/xbase62 v0.1.0 h1:dtDRFCA1S1zyam4LQntYus17UzfPEmc77YCB65tVVtU=
 go.olapie.com/x/xbase62 v0.1.0/go.mod h1:Yx8CATE0o5UOF3bnSo+TbXvhnJKZT27AlSbvly4I0qI=
 go.olapie.com/x/xtest v0.1.0 h1:RSpCaCTpFAYlhneaFsdo4Z7saXasRT72otOEUvrmVRk=

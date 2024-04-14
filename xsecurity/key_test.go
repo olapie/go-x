@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"go.olapie.com/security/internal/testutil"
+	"go.olapie.com/x/xtest"
 )
 
 func TestDeriveKey(t *testing.T) {
@@ -15,27 +15,27 @@ func TestDeriveKey(t *testing.T) {
 }
 
 func TestStream(t *testing.T) {
-	raw := testutil.RandomBytes(8)
-	password := testutil.RandomString(8)
+	raw := xtest.RandomBytes(8)
+	password := xtest.RandomString(8)
 	stream1 := getCipherStream(password)
 	stream2 := getCipherStream(password)
 
 	data := bytes.Clone(raw)
-	testutil.Equal(t, raw, data)
+	xtest.Equal(t, raw, data)
 
 	// encrypt
 	stream1.XORKeyStream(data, data)
-	testutil.NotEqual(t, raw, data)
+	xtest.NotEqual(t, raw, data)
 
 	// decrypt
 	stream2.XORKeyStream(data, data)
-	testutil.Equal(t, raw, data)
+	xtest.Equal(t, raw, data)
 }
 
 func TestStream2(t *testing.T) {
 	n := 10 * 500
-	raw := testutil.RandomBytes(n)
-	password := testutil.RandomString(8)
+	raw := xtest.RandomBytes(n)
+	password := xtest.RandomString(8)
 	var encrypted []byte
 	{
 		stream1 := getCipherStream(password)
@@ -57,7 +57,7 @@ func TestStream2(t *testing.T) {
 			buf2.Write(data[:])
 		}
 
-		testutil.Equal(t, buf1.Bytes(), buf2.Bytes())
+		xtest.Equal(t, buf1.Bytes(), buf2.Bytes())
 		encrypted = buf1.Bytes()
 	}
 
@@ -81,8 +81,8 @@ func TestStream2(t *testing.T) {
 			buf2.Write(data[:])
 		}
 
-		testutil.Equal(t, buf1.Bytes(), buf2.Bytes())
-		testutil.Equal(t, raw, buf1.Bytes())
+		xtest.Equal(t, buf1.Bytes(), buf2.Bytes())
+		xtest.Equal(t, raw, buf1.Bytes())
 	}
 
 }

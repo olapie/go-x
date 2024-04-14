@@ -4,7 +4,6 @@ go 1.22.0
 
 require (
 	github.com/google/uuid v1.6.0
-	go.olapie.com/security v0.2.2
 	go.olapie.com/x/xbase62 v0.1.0
 	go.olapie.com/x/xtest v0.1.0
 	golang.org/x/crypto v0.22.0

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"go.olapie.com/security/internal/testutil"
+	"go.olapie.com/x/xtest"
 )
 
 func TestEncrypt(t *testing.T) {
@@ -26,12 +26,12 @@ func testEncrypt(t *testing.T, size int, password string) {
 
 	enc, err := Encrypt(raw[:], password)
 	t.Log(enc[:30])
-	testutil.NoError(t, err)
-	testutil.True(t, IsEncrypted(enc))
+	xtest.NoError(t, err)
+	xtest.True(t, IsEncrypted(enc))
 	dec, err := Decrypt(enc, password)
-	testutil.NoError(t, err)
-	testutil.False(t, IsEncrypted(dec), dec[:HeaderSize])
-	testutil.Equal(t, raw, dec)
+	xtest.NoError(t, err)
+	xtest.False(t, IsEncrypted(dec), dec[:HeaderSize])
+	xtest.Equal(t, raw, dec)
 }
 
 func TestEncryptFile(t *testing.T) {
@@ -50,10 +50,10 @@ func TestEncryptFile(t *testing.T) {
 	password := SHA1(time.Now().String())
 	var raw [32]byte
 	n, err := io.ReadFull(rand.Reader, raw[:])
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 	t.Log(n, raw)
 	f, err := os.OpenFile(rawFilename, os.O_CREATE|os.O_WRONLY, 0644)
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 
 	_, err = f.Write(raw[:])
 	f.Close()
@@ -65,14 +65,14 @@ func TestEncryptFile(t *testing.T) {
 
 	var large [32 * 1024 * 1024]byte
 	n, err = io.ReadFull(rand.Reader, large[:])
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 
 	f, err = os.OpenFile(largeFilename, os.O_CREATE|os.O_WRONLY, 0644)
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 
 	_, err = f.Write(large[:])
 	f.Close()
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 
 	testEncryptFile(t, largeFilename, password)
 }
@@ -85,23 +85,23 @@ func testEncryptFile(t *testing.T, rawFilename string, password string) {
 		os.RemoveAll(encFilename)
 	})
 	err := EncryptFile(SF(rawFilename), DF(encFilename), password)
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 
-	testutil.True(t, IsEncryptedFile(encFilename))
-	testutil.False(t, IsEncryptedFile(rawFilename))
+	xtest.True(t, IsEncryptedFile(encFilename))
+	xtest.False(t, IsEncryptedFile(rawFilename))
 	err = DecryptFile(SF(encFilename), DF(decFilename), password)
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 	raw, err := os.ReadFile(rawFilename)
-	testutil.NoError(t, err)
+	xtest.NoError(t, err)
 
 	enc, err := os.ReadFile(encFilename)
-	testutil.NoError(t, err)
-	testutil.NotEqual(t, raw, enc)
+	xtest.NoError(t, err)
+	xtest.NotEqual(t, raw, enc)
 
 	dec, err := os.ReadFile(decFilename)
-	testutil.NoError(t, err)
-	testutil.Equal(t, raw, dec)
+	xtest.NoError(t, err)
+	xtest.Equal(t, raw, dec)
 
 	valid := ValidateFilePassword(encFilename, password)
-	testutil.True(t, valid)
+	xtest.True(t, valid)
 }
