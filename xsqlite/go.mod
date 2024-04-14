@@ -5,12 +5,12 @@ go 1.22.0
 require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/mattn/go-sqlite3 v1.14.16
+	github.com/mattn/go-sqlite3 v1.14.22
 	go.olapie.com/security v0.2.2
 	go.olapie.com/times v1.1.3
 	go.olapie.com/x/xconv v0.1.1
-	go.olapie.com/x/xsecurity v0.1.1
-	go.olapie.com/x/xsql v0.1.0
+	go.olapie.com/x/xsecurity v0.1.2
+	go.olapie.com/x/xsql v0.1.1
 	go.olapie.com/x/xtest v0.1.0
 )
 
