@@ -1,0 +1,6 @@
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+go.olapie.com/x/xlog v0.1.0 h1:RqC4g/My3BuHhGEm+IKG8/RqWe6ruw4VvuSgCjNRnl8=
+go.olapie.com/x/xlog v0.1.0/go.mod h1:4tTaPhl1tN2VXHCQuCe9JvWaMupaS4W00pS/yYbn50I=
+go.olapie.com/x/xtype v0.1.0 h1:AOK2tW0IdFs12xXfCPCmh6oOeRGXULubhArRmBvGPwc=
+go.olapie.com/x/xtype v0.1.0/go.mod h1:byPYpyQesmZsnqCQasI3G21/XM34RVH4MHFT6K/uUoE=
