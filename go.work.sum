@@ -19,10 +19,12 @@ github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaS
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/google/uuid v1.4.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/natefinch/lumberjack/v3 v3.0.0-alpha h1:HZ2AJF20D1lo9S0F/rpgkFbPGam5dgR3X0KUtZA5mlY=
+github.com/natefinch/lumberjack/v3 v3.0.0-alpha/go.mod h1:rPTlHhMjhrvPAhqKh0FC57E0pXZoanrXgMDj4yv5wcM=
 go.olapie.com/conv v1.3.4 h1:xHU0MAWXKAuj5zTp4bYzkl+Zk6ZT/8uXVogvRnKc50s=
 go.olapie.com/conv v1.3.4/go.mod h1:GHfOZtIF97zrrP1VAtnskRHTVwA5qyIjUmZv1/rorNE=
-go.olapie.com/x/xsecurity v0.1.2/go.mod h1:bUtGeD7QwdQ3xYA3D3qI/pE3VcvNewjscnZ1yD9nZo0=
-go.olapie.com/x/xsql v0.1.1/go.mod h1:Cf/DKRS0N0Ql+uoQJwiHG9X4cdkKLTPX8wZQG5md4/g=
+go.olapie.com/logs v0.2.4 h1:U1HSl3VGzX91z9cHGA4CGgLbO3bTEinpmnzBjFqOsHM=
+go.olapie.com/logs v0.2.4/go.mod h1:gjT9mMN8H/1uVA6cuikjJ5V7xCodsYgciMl9F9Ldu54=
 golang.org/x/mod v0.8.0 h1:LUYupSeNrTNCGzR/hVBk2NHZO4hXcVaW1k4Qx7rjPx8=
 golang.org/x/mod v0.8.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/net v0.10.0 h1:X2//UzNDwYmtCLn7To6G58Wr6f5ahEAQgKNzv9Y951M=

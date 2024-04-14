@@ -12,6 +12,7 @@ use (
 	./xjwt
 	./xlog
 	./xmime
+	./xpostgres
 	./xsecurity
 	./xsession
 	./xsql
