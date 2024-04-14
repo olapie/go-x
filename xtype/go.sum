@@ -1,0 +1,8 @@
+go.olapie.com/naming v0.3.0 h1:RbECxGQsYJzjYaWYhxXL1mesqmbyvQmHu/GJmhbauUQ=
+go.olapie.com/naming v0.3.0/go.mod h1:dpA2OFjxkysG5ZxlqlzEsybisd2qxsgxOdXYiLm0wS8=
+go.olapie.com/x/xconv v0.1.1 h1:EBoJC0Tv8oR/8yfpJMHmBbVjQ+OkiSeq39pak3Grb0s=
+go.olapie.com/x/xconv v0.1.1/go.mod h1:avwhhaun2k5XCXrrN47+3bBHmIC1eEf/uhRsHSFrM94=
+go.olapie.com/x/xtest v0.1.0 h1:RSpCaCTpFAYlhneaFsdo4Z7saXasRT72otOEUvrmVRk=
+go.olapie.com/x/xtest v0.1.0/go.mod h1:VpuunW0086ZFLcZ0Iu8BhjaCSLxjgsvouDgS5zlPIC0=
+golang.org/x/text v0.13.0 h1:ablQoSUd0tRdKxZewP80B+BaqeKJuVhuRxj/dkrun3k=
+golang.org/x/text v0.13.0/go.mod h1:TvPlkZtksWOMsz7fbANvkp4WM8x/WCo/om8BMLbz+aE=
