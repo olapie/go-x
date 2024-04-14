@@ -1,4 +1,4 @@
-module go.olapie.com/dbx/sqlitex
+module go.olapie.com/x/xsqlite
 
 go 1.22.0
 

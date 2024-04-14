@@ -1,4 +1,4 @@
-package sqlitex
+package xsqlite
 
 import (
 	"database/sql"
