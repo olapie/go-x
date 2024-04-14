@@ -1,0 +1,17 @@
+go 1.22.0
+
+use (
+	./xbase36
+	./xbase62
+	./xconv
+	./xcontext
+	./xerror
+	./xhttp
+	./xhttpheader
+	./xlog
+	./xmime
+	./xurl
+	./xtest
+	./xtype
+	./xsession
+)

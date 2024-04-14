@@ -1,0 +1,26 @@
+package xhttp
+
+import (
+	"go.olapie.com/x/xbase62"
+	"go.olapie.com/x/xcontext"
+	"go.olapie.com/x/xhttpheader"
+	"go.olapie.com/x/xlog"
+	"net/http"
+)
+
+func SignRequest(req *http.Request, createAPIKey func(h http.Header)) {
+	a := xcontext.GetOutgoingActivity(req.Context())
+	if a != nil {
+		xcontext.CopyActivityHeader(req.Header, a)
+	} else {
+		xlog.FromContext(req.Context()).Warn("no outgoing context")
+	}
+	if traceID := xhttpheader.GetTraceID(req.Header); traceID == "" {
+		if traceID == "" {
+			traceID = xbase62.NewUUIDString()
+			xlog.FromContext(req.Context()).Info("generated trace id " + traceID)
+		}
+		xhttpheader.SetTraceID(req.Header, traceID)
+	}
+	createAPIKey(req.Header)
+}
