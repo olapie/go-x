@@ -7,11 +7,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.olapie.com/x/xsecurity"
 	"log"
 	"strings"
 
 	lru "github.com/hashicorp/golang-lru/v2"
-	"go.olapie.com/security"
 	"go.olapie.com/times"
 )
 
@@ -533,11 +533,11 @@ func (t *LocalTable[R]) encryptTable(ctx context.Context, tableName string) (map
 			return nil, fmt.Errorf("scan %s: %w", tableName, err)
 		}
 
-		if security.IsEncrypted(data) {
+		if xsecurity.IsEncrypted(data) {
 			continue
 		}
 
-		data, err = security.Encrypt(data, t.options.Password+localID)
+		data, err = xsecurity.Encrypt(data, t.options.Password+localID)
 		if err != nil {
 			return nil, fmt.Errorf("encrypt %s: %w", tableName, err)
 		}
@@ -632,12 +632,12 @@ func (t *LocalTable[R]) encode(localID string, r R) (data []byte, err error) {
 		return
 	}
 
-	return security.Encrypt(data, t.options.Password+localID)
+	return xsecurity.Encrypt(data, t.options.Password+localID)
 }
 
 func (t *LocalTable[R]) decode(localID string, data []byte) (record R, err error) {
 	if t.options.Password != "" {
-		data, err = security.Decrypt(data, t.options.Password+localID)
+		data, err = xsecurity.Decrypt(data, t.options.Password+localID)
 		if err != nil {
 			return
 		}
