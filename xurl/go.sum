@@ -1,2 +1,2 @@
-go.olapie.com/conv v1.6.0 h1:CZJxHmZZe5CMTagGtFuW15IYQvcqDxCgI4FUrKmMuOU=
-go.olapie.com/conv v1.6.0/go.mod h1:PeR5OyPc/Qv3SjEJOzoFW/AbeycNjQuTL1P59n09sVQ=
+go.olapie.com/x/xconv v0.1.0 h1:J/ErCaduc9tKjt6gtVTJunqS+z09lUr1OlRsZMVxF8M=
+go.olapie.com/x/xconv v0.1.0/go.mod h1:avwhhaun2k5XCXrrN47+3bBHmIC1eEf/uhRsHSFrM94=
