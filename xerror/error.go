@@ -16,7 +16,7 @@ func (s String) Error() string {
 }
 
 const (
-	DBNoRecord String = "database: no records"
+	DBNoRecords String = "database: no records"
 )
 
 type APIError struct {
