@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"net/url"
 	"path"
 	"reflect"
@@ -34,7 +35,7 @@ func Join(a ...string) string {
 }
 
 func ToValues(i any) (url.Values, error) {
-	i = xconv.IndirectToStringerOrError(i)
+	i = xreflect.IndirectToStringerOrError(i)
 	if i == nil {
 		return nil, errors.New("nil values")
 	}
@@ -122,7 +123,7 @@ func SetPathParams(endpoint string, params any) (string, any) {
 		return endpoint, params
 	}
 
-	if len(paramIndexes) == 1 && (xconv.IsNumber(params) || xconv.IsString(params)) {
+	if len(paramIndexes) == 1 && (xreflect.IsNumber(params) || xreflect.IsString(params)) {
 		str := fmt.Sprint(params)
 		if str == "" {
 			return endpoint, params
@@ -131,7 +132,7 @@ func SetPathParams(endpoint string, params any) (string, any) {
 		return strings.Join(segments, "/"), nil
 	}
 
-	k := xconv.IndirectKind(params)
+	k := xreflect.IndirectKind(params)
 	if k != reflect.Struct && k != reflect.Map {
 		return endpoint, params
 	}
