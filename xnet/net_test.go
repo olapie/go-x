@@ -1,4 +1,4 @@
-package net
+package xnet
 
 import (
 	"go.olapie.com/x/xrand"
