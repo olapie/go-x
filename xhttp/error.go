@@ -17,7 +17,7 @@ func ReadError(resp *http.Response) error {
 
 	contentType := resp.Header.Get("Content-Type")
 	if !isText(contentType) {
-		return xerror.New(resp.StatusCode, resp.Status)
+		return xerror.NewAPIError(resp.StatusCode, resp.Status)
 	}
 
 	body, ioErr := io.ReadAll(resp.Body)
@@ -42,7 +42,7 @@ func ReadError(resp *http.Response) error {
 		message = resp.Status
 	}
 
-	return xerror.New(code, message)
+	return xerror.NewAPIError(code, message)
 }
 
 var textTypes = []string{

@@ -10,6 +10,7 @@ require (
 	go.olapie.com/x/xhttpheader v0.1.0
 	go.olapie.com/x/xlog v0.1.0
 	go.olapie.com/x/xmime v0.1.0
+	go.olapie.com/x/xreflect v0.1.0
 	go.olapie.com/x/xtype v0.1.0
 	go.olapie.com/x/xurl v0.1.0
 )

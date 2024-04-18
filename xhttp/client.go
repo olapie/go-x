@@ -29,7 +29,7 @@ func DoWithResponse(ctx context.Context, method, url string, body io.Reader) (*h
 		return nil, fmt.Errorf("io.ReadAll: %w", err)
 	}
 	resp.Body.Close()
-	return nil, xerror.New(resp.StatusCode, string(message))
+	return nil, xerror.NewAPIError(resp.StatusCode, string(message))
 }
 
 func Do(ctx context.Context, method, url string, body io.Reader) error {

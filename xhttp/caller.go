@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"io"
 	"log"
 	"net/http"
@@ -81,7 +82,7 @@ func (c *Caller[IN, OUT]) WithQueryArgs(keysAndValues ...any) *Caller[IN, OUT] {
 		if !ok {
 			if stringer, ok := v.(fmt.Stringer); ok {
 				vs = stringer.String()
-			} else if xconv.IsNumber(v) {
+			} else if xreflect.IsNumber(v) {
 				vs = fmt.Sprint(v)
 			}
 		}
@@ -162,11 +163,11 @@ func (c *Caller[IN, OUT]) call(ctx context.Context, input IN) (*http.Response, e
 
 	resp, err := client.Do(req)
 	if err != nil {
-		if err == context.DeadlineExceeded {
-			err = xerror.New(http.StatusRequestTimeout, err.Error())
+		if errors.Is(err, context.DeadlineExceeded) {
+			err = xerror.NewAPIError(http.StatusRequestTimeout, err.Error())
 		} else {
 			if tr, ok := err.(interface{ Timeout() bool }); ok && tr.Timeout() {
-				err = xerror.New(http.StatusRequestTimeout, err.Error())
+				err = xerror.NewAPIError(http.StatusRequestTimeout, err.Error())
 			}
 		}
 		return nil, fmt.Errorf("send request: %w", err)
@@ -207,7 +208,7 @@ func (c *Caller[IN, OUT]) parseInput(contentType *string, endpoint *string, inpu
 		return nil, nil
 	}
 
-	kindOfRemain := xconv.IndirectKind(remain)
+	kindOfRemain := xreflect.IndirectKind(remain)
 	switch kindOfRemain {
 	case reflect.Struct, reflect.Map, reflect.Slice:
 		*contentType = xmime.JsonUTF8
@@ -217,7 +218,7 @@ func (c *Caller[IN, OUT]) parseInput(contentType *string, endpoint *string, inpu
 		}
 		return bytes.NewBuffer(data), nil
 	default:
-		if xconv.IsNumber(remain) || xconv.IsString(remain) {
+		if xreflect.IsNumber(remain) || xreflect.IsString(remain) {
 			*contentType = xmime.PlainUTF8
 			return bytes.NewReader([]byte(fmt.Sprint(remain))), nil
 		}
@@ -294,7 +295,7 @@ func GetResponseResult[T any](resp *http.Response) (T, error) {
 		return res, fmt.Errorf("read resp body: %v", err)
 	}
 	if resp.StatusCode >= http.StatusBadRequest {
-		return res, xerror.New(resp.StatusCode, string(body))
+		return res, xerror.NewAPIError(resp.StatusCode, string(body))
 	}
 
 	if any(res) == nil {

@@ -109,7 +109,7 @@ func NewStartHandler(
 
 		appID := a.GetAppID()
 		if appID == "" {
-			Error(w, xerror.New(http.StatusBadRequest, "client appId does not match authenticated appId"))
+			Error(w, xerror.NewAPIError(http.StatusBadRequest, "client appId does not match authenticated appId"))
 			return
 		}
 
@@ -117,7 +117,7 @@ func NewStartHandler(
 			auth := authenticate(ctx, req.Header)
 			if auth != nil {
 				if auth.AppID != appID {
-					Error(w, xerror.New(http.StatusUnauthorized, "client appId does not match authenticated appId"))
+					Error(w, xerror.NewAPIError(http.StatusUnauthorized, "client appId does not match authenticated appId"))
 					return
 				} else {
 					a.SetUserID(auth.UserID)
@@ -126,7 +126,7 @@ func NewStartHandler(
 			}
 			maybeNext.ServeHTTP(w, req)
 		} else {
-			Error(w, xerror.New(http.StatusBadRequest, "invalid api key"))
+			Error(w, xerror.NewAPIError(http.StatusBadRequest, "invalid api key"))
 			return
 		}
 	})
