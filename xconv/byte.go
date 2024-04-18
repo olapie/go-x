@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"reflect"
 	"strconv"
 )
 
 func ToBytes(i any) ([]byte, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	switch v := i.(type) {
 	case []byte:
 		return v, nil
@@ -125,7 +126,7 @@ func UnsafeUnmarshal(data []byte, i any) (err error) {
 
 	// i is a pointer
 	// v is pointer of the same type
-	v := DeepNew(reflect.TypeOf(i).Elem())
+	v := xreflect.DeepNew(reflect.TypeOf(i).Elem())
 	defer func() {
 		if err == nil {
 			// assign v to i

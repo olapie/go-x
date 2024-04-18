@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"log"
 	"reflect"
 )
@@ -54,7 +55,7 @@ func UnsafeAssign(dst any, src any, optFns ...func(options *UnsafeAssignOptions)
 		_ = GobCopy(dst, src)
 	}()
 
-	dv := IndirectWritableValue(reflect.ValueOf(dst), false)
+	dv := xreflect.IndirectWritableValue(reflect.ValueOf(dst), false)
 	// dv must be a nil pointer or a valid value
 	err := unsafeAssign(dv, reflect.ValueOf(src), options)
 	if err != nil {
@@ -65,8 +66,8 @@ func UnsafeAssign(dst any, src any, optFns ...func(options *UnsafeAssignOptions)
 
 // dst is valid value or pointer to value
 func unsafeAssign(dst reflect.Value, src reflect.Value, options *UnsafeAssignOptions) error {
-	src = IndirectReadableValue(src)
-	dv := IndirectWritableValue(dst, true)
+	src = xreflect.IndirectReadableValue(src)
+	dv := xreflect.IndirectWritableValue(dst, true)
 	switch dv.Kind() {
 	case reflect.Bool:
 		b, err := ToBool(src.Interface())
@@ -115,19 +116,19 @@ func unsafeAssign(dst reflect.Value, src reflect.Value, options *UnsafeAssignOpt
 		}
 		dv.Set(pv.Elem())
 	default:
-		if IsIntValue(dv) {
+		if xreflect.IsIntValue(dv) {
 			i, err := ToInt64(src.Interface())
 			if err != nil {
 				return fmt.Errorf("parse int64: %w", err)
 			}
 			dv.SetInt(i)
-		} else if IsUintValue(dv) {
+		} else if xreflect.IsUintValue(dv) {
 			i, err := ToUint64(src.Interface())
 			if err != nil {
 				return fmt.Errorf("parse uint64: %w", err)
 			}
 			dv.SetUint(i)
-		} else if IsFloatValue(dv) {
+		} else if xreflect.IsFloatValue(dv) {
 			i, err := ToFloat64(src.Interface())
 			if err != nil {
 				return fmt.Errorf("parse float64: %w", err)
@@ -311,7 +312,7 @@ func structToStruct(dst reflect.Value, src reflect.Value, options *UnsafeAssignO
 				continue
 			}
 
-			if !IsExported(sfName) || !options.FieldNameMatcher.MatchFieldName(sfName, ft.Name) {
+			if !xreflect.IsExported(sfName) || !options.FieldNameMatcher.MatchFieldName(sfName, ft.Name) {
 				continue
 			}
 
@@ -326,7 +327,7 @@ func structToStruct(dst reflect.Value, src reflect.Value, options *UnsafeAssignO
 	for i := 0; i < src.NumField(); i++ {
 		sfv := src.Field(i)
 		sfName := src.Type().Field(i).Name
-		if !sfv.IsValid() || (sfv.CanInterface() && sfv.Interface() == nil) || sfv.IsZero() || !IsExported(sfName) {
+		if !sfv.IsValid() || (sfv.CanInterface() && sfv.Interface() == nil) || sfv.IsZero() || !xreflect.IsExported(sfName) {
 			continue
 		}
 
@@ -356,11 +357,11 @@ func Validate(i any) error {
 		}
 	}
 
-	v = IndirectReadableValue(v)
+	v = xreflect.IndirectReadableValue(v)
 	if v.Kind() == reflect.Struct {
 		t := v.Type()
 		for j := 0; j < v.NumField(); j++ {
-			if !IsExported(t.Field(j).Name) {
+			if !xreflect.IsExported(t.Field(j).Name) {
 				continue
 			}
 			if err := Validate(v.Field(j).Interface()); err != nil {
@@ -396,11 +397,11 @@ func UnsafeSetBytes(target any, b []byte) error {
 		return nil
 	}
 
-	v := IndirectReadableValue(reflect.ValueOf(target))
+	v := xreflect.IndirectReadableValue(reflect.ValueOf(target))
 	if !v.CanSet() {
 		return fmt.Errorf("cannot set value: %T", target)
 	}
-	if IsIntValue(v) {
+	if xreflect.IsIntValue(v) {
 		i, err := ToInt64(b)
 		if err != nil {
 			return fmt.Errorf("parse int: %v", err)
@@ -408,7 +409,7 @@ func UnsafeSetBytes(target any, b []byte) error {
 		v.SetInt(i)
 	}
 
-	if IsUintValue(v) {
+	if xreflect.IsUintValue(v) {
 		i, err := ToUint64(b)
 		if err != nil {
 			return fmt.Errorf("parse uint: %w", err)
@@ -416,7 +417,7 @@ func UnsafeSetBytes(target any, b []byte) error {
 		v.SetUint(i)
 	}
 
-	if IsFloatValue(v) {
+	if xreflect.IsFloatValue(v) {
 		i, err := ToFloat64(b)
 		if err != nil {
 			return fmt.Errorf("parse float: %w", err)

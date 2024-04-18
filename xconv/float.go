@@ -2,6 +2,7 @@ package xconv
 
 import (
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"math"
 	"reflect"
 	"strconv"
@@ -19,7 +20,7 @@ func ToFloat32(i any) (float32, error) {
 }
 
 func ToFloat64(i any) (float64, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return 0, strconv.ErrSyntax
 	}
@@ -28,15 +29,15 @@ func ToFloat64(i any) (float64, error) {
 		i = string(b)
 	}
 	v := reflect.ValueOf(i)
-	if IsIntValue(v) {
+	if xreflect.IsIntValue(v) {
 		return float64(v.Int()), nil
 	}
 
-	if IsUintValue(v) {
+	if xreflect.IsUintValue(v) {
 		return float64(v.Uint()), nil
 	}
 
-	if IsFloatValue(v) {
+	if xreflect.IsFloatValue(v) {
 		return v.Float(), nil
 	}
 
@@ -54,7 +55,7 @@ func ToFloat64(i any) (float64, error) {
 }
 
 func ToFloat32Slice(i any) ([]float32, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return nil, nil
 	}
@@ -78,7 +79,7 @@ func ToFloat32Slice(i any) ([]float32, error) {
 }
 
 func ToFloat64Slice(i any) ([]float64, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return nil, nil
 	}

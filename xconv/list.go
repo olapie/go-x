@@ -2,6 +2,7 @@ package xconv
 
 import (
 	"container/list"
+	"go.olapie.com/x/xreflect"
 	"reflect"
 )
 
@@ -22,7 +23,7 @@ func ToList(i any) *list.List {
 	}
 
 	l := list.New()
-	v := reflect.ValueOf(Indirect(i))
+	v := reflect.ValueOf(xreflect.Indirect(i))
 	if v.IsValid() && (v.Kind() == reflect.Slice || v.Kind() == reflect.Array) && !v.IsNil() {
 		for j := 0; j < v.Len(); j++ {
 			l.PushBack(v.Index(j).Interface())

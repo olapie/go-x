@@ -3,6 +3,7 @@ package xconv
 import (
 	"errors"
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"log"
 	"math"
 	"reflect"
@@ -127,7 +128,7 @@ func ToUint64(i any) (uint64, error) {
 }
 
 func ToIntSlice(i any) ([]int, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return nil, nil
 	}
@@ -155,7 +156,7 @@ func ToIntSlice(i any) ([]int, error) {
 }
 
 func ToInt64Slice(i any) ([]int64, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return nil, nil
 	}
@@ -184,7 +185,7 @@ func ToInt64Slice(i any) ([]int64, error) {
 }
 
 func ToUintSlice(i any) ([]uint, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return nil, nil
 	}
@@ -213,7 +214,7 @@ func ToUintSlice(i any) ([]uint, error) {
 }
 
 func ToUint64Slice(i any) ([]uint64, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return nil, nil
 	}
@@ -474,7 +475,7 @@ func CastFromInt64P[T ~int64 | ~int](p *int64) *T {
 }
 
 func parseInt64(i any) (int64, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return 0, strconv.ErrSyntax
 	}
@@ -482,11 +483,11 @@ func parseInt64(i any) (int64, error) {
 		i = string(b)
 	}
 	v := reflect.ValueOf(i)
-	if IsIntValue(v) {
+	if xreflect.IsIntValue(v) {
 		return v.Int(), nil
 	}
 
-	if IsUintValue(v) {
+	if xreflect.IsUintValue(v) {
 		n := v.Uint()
 		if n > math.MaxInt64 {
 			return 0, strconv.ErrRange
@@ -494,7 +495,7 @@ func parseInt64(i any) (int64, error) {
 		return int64(n), nil
 	}
 
-	if IsFloatValue(v) {
+	if xreflect.IsFloatValue(v) {
 		return int64(v.Float()), nil
 	}
 
@@ -522,7 +523,7 @@ func parseInt64(i any) (int64, error) {
 }
 
 func parseUint64(i any) (uint64, error) {
-	i = Indirect(i)
+	i = xreflect.Indirect(i)
 	if i == nil {
 		return 0, strconv.ErrSyntax
 	}
@@ -530,7 +531,7 @@ func parseUint64(i any) (uint64, error) {
 		i = string(b)
 	}
 	v := reflect.ValueOf(i)
-	if IsIntValue(v) {
+	if xreflect.IsIntValue(v) {
 		n := v.Int()
 		if n < 0 {
 			return 0, strconv.ErrRange
@@ -538,11 +539,11 @@ func parseUint64(i any) (uint64, error) {
 		return uint64(n), nil
 	}
 
-	if IsUintValue(v) {
+	if xreflect.IsUintValue(v) {
 		return v.Uint(), nil
 	}
 
-	if IsFloatValue(v) {
+	if xreflect.IsFloatValue(v) {
 		f := v.Float()
 		if f < 0 {
 			return 0, strconv.ErrRange
