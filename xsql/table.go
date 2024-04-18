@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"log"
 	"reflect"
 	"strings"
 
 	"go.olapie.com/naming"
-	"go.olapie.com/x/xconv"
 )
 
 type tableNamer interface {
@@ -320,7 +320,7 @@ func (t *Table) Select(records any, where string, args ...any) error {
 	sliceValue := v.Elem()
 	fields := make([]any, len(fi.indexes))
 	for rows.Next() {
-		ptrToElem := xconv.DeepNew(elemType)
+		ptrToElem := xreflect.DeepNew(elemType)
 		elem := ptrToElem.Elem()
 		for i, idx := range fi.indexes {
 			if IndexOfString(fi.jsonNames, fi.names[i]) >= 0 {
@@ -410,7 +410,7 @@ func (t *Table) SelectOne(record any, where string, args ...any) error {
 	}
 
 	//Store result in ev. If failed, don't change record's value
-	ev := xconv.DeepNew(rv.Elem().Type()).Elem()
+	ev := xreflect.DeepNew(rv.Elem().Type()).Elem()
 	elem := ev
 	if elem.Kind() == reflect.Ptr {
 		elem = elem.Elem()
@@ -445,13 +445,13 @@ func (t *Table) SelectOne(record any, where string, args ...any) error {
 		} else if IndexOfString(info.nullableNames, info.names[i]) >= 0 {
 			field := elem.FieldByIndex(idx)
 			switch {
-			case xconv.IsInt(field), xconv.IsUint(field):
+			case xreflect.IsInt(field), xreflect.IsUint(field):
 				var v sql.NullInt64
 				fieldAddrs[i] = &v
 			case field.Kind() == reflect.Bool:
 				var b sql.NullBool
 				fieldAddrs[i] = &b
-			case xconv.IsFloat(field):
+			case xreflect.IsFloat(field):
 				var v sql.NullFloat64
 				fieldAddrs[i] = &v
 			case field.Kind() == reflect.String:
