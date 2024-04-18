@@ -13,8 +13,10 @@ use (
 	./xjwt
 	./xlog
 	./xmime
+	./xnet
 	./xpostgres
 	./xrand
+	./xreflect
 	./xsecurity
 	./xsession
 	./xsql
