@@ -2,9 +2,8 @@ package xerror
 
 import (
 	"fmt"
+	"go.olapie.com/x/xreflect"
 	"reflect"
-
-	"go.olapie.com/x/xconv"
 )
 
 type String string
@@ -93,7 +92,7 @@ func GetCode(err error) int {
 		return int(s.GetStatus())
 	}
 
-	v := reflect.ValueOf(xconv.Indirect(err))
+	v := reflect.ValueOf(xreflect.Indirect(err))
 	t := v.Type()
 	switch v.Kind() {
 	case reflect.Struct:
