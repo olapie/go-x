@@ -2,7 +2,7 @@ package xjwt
 
 import (
 	"crypto/ecdsa"
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -26,11 +26,11 @@ func Parse(publicKey *ecdsa.PublicKey, tokenString string) (appID, userID string
 		return publicKey, nil
 	}) // e.g. option jwt.WithLeeway(5*time.Second)
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("parse token: %s, %w", tokenString, err)
 	}
 
 	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
 		return claims.Issuer, claims.Subject, nil
 	}
-	return "", "", errors.New("invalid token")
+	return "", "", fmt.Errorf("invalid token: %s", tokenString)
 }
