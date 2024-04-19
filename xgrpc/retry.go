@@ -3,7 +3,8 @@ package xgrpc
 import (
 	"context"
 	"errors"
-	"log/slog"
+	"fmt"
+	"go.olapie.com/x/xreflect"
 	"time"
 
 	"go.olapie.com/x/xcontext"
@@ -21,13 +22,15 @@ type RetryOptions struct {
 }
 
 type Retry[IN proto.Message, OUT proto.Message] struct {
-	options RetryOptions
-	call    func(ctx context.Context, in IN, options ...grpc.CallOption) (OUT, error)
+	options  RetryOptions
+	call     func(ctx context.Context, in IN, options ...grpc.CallOption) (OUT, error)
+	callName string
 }
 
 func NewRetry[IN proto.Message, OUT proto.Message](call func(ctx context.Context, in IN, options ...grpc.CallOption) (OUT, error), options ...func(options *RetryOptions)) *Retry[IN, OUT] {
 	r := &Retry[IN, OUT]{
-		call: call,
+		call:     call,
+		callName: xreflect.FuncNameOf(call),
 	}
 	for _, opt := range options {
 		opt(&r.options)
@@ -44,17 +47,18 @@ func NewRetry[IN proto.Message, OUT proto.Message](call func(ctx context.Context
 func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOption) (OUT, error) {
 	var out OUT
 	var err error
+	logger := xlog.FromContext(ctx).With("module", "xgrpc").With("call", r.callName)
 	for i := 0; i < r.options.Count; i++ {
 		if i > 0 {
-			xlog.FromContext(ctx).Info("retry", slog.Int("attempts", i))
+			logger.Info(fmt.Sprintf("retrying %d", i))
 		}
 		out, err = r.call(ctx, in, options...)
 		if err == nil {
-			return out, err
+			return out, nil
 		}
 
 		if errors.Is(err, context.DeadlineExceeded) || ctx.Err() != nil {
-			return out, err
+			return out, fmt.Errorf("failed to call due to context error: %w", err)
 		}
 
 		switch GetErrorCode(err) {
@@ -66,32 +70,39 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 			codes.AlreadyExists,
 			codes.NotFound,
 			codes.DeadlineExceeded:
-			return out, err
+			return out, fmt.Errorf("failed to call: %w", err)
 		case codes.Unauthenticated:
 			if r.options.RefreshAccessToken == nil {
-				return out, err
+				return out, fmt.Errorf("failed to call: %w, and options.RefreshAccessToken is nil", err)
 			}
+			logger.Info("refreshing access token")
 			accessToken, err := r.options.RefreshAccessToken(ctx)
-			if errors.Is(err, context.DeadlineExceeded) || ctx.Err() != nil {
-				return out, err
-			}
-			switch GetErrorCode(err) {
-			case codes.InvalidArgument,
-				codes.Unimplemented,
-				codes.PermissionDenied,
-				codes.Internal,
-				codes.AlreadyExists,
-				codes.NotFound,
-				codes.DeadlineExceeded,
-				codes.Unauthenticated:
-				return out, err
-			}
 
-			act := xcontext.GetOutgoingActivity(ctx)
-			if act == nil {
-				return out, xerror.BadRequest("no outgoing context")
+			if err == nil {
+				act := xcontext.GetOutgoingActivity(ctx)
+				if act == nil {
+					return out, xerror.BadRequest("no outgoing activity")
+				}
+				act.SetAuthorization(accessToken)
+				logger.Info("refreshed access token successfully")
+			} else {
+				if errors.Is(err, context.DeadlineExceeded) || ctx.Err() != nil {
+					return out, fmt.Errorf("failed to refresh access token due to context error: %w", err)
+				}
+
+				switch GetErrorCode(err) {
+				case codes.InvalidArgument,
+					codes.Unimplemented,
+					codes.PermissionDenied,
+					codes.Internal,
+					codes.AlreadyExists,
+					codes.NotFound,
+					codes.DeadlineExceeded,
+					codes.Unauthenticated:
+					return out, fmt.Errorf("failed to refresh access token: %w", err)
+				}
+				logger.Error("failed to refresh access token: %v", err)
 			}
-			act.SetAuthorization(accessToken)
 		default:
 			time.Sleep(r.options.Backoff)
 		}
