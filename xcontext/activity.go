@@ -75,6 +75,11 @@ func (a *Activity) SetUserID(id xtype.UserIDInterface) {
 
 func (a *Activity) Set(key string, value string) {
 	key = strings.ToLower(key)
+	a.header[key] = []string{value}
+}
+
+func (a *Activity) Append(key string, value string) {
+	key = strings.ToLower(key)
 	a.header[key] = append(a.header[key], value)
 }
 
