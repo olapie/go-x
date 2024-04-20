@@ -78,8 +78,8 @@ func NewStartHandler(
 		}
 
 		ctx = xlog.NewContext(ctx, logger)
-		logger = logger.With("module", "httpkit")
-		logger.Info("START", fields...)
+		logger = logger.With("module", "xhttp")
+		logger.InfoContext(ctx, "START", fields...)
 		var cancel context.CancelFunc
 		if seconds := a.GetRequestTimeout(); seconds > 0 {
 			ctx, cancel = context.WithTimeout(ctx, time.Duration(seconds)*time.Second)
@@ -91,7 +91,7 @@ func NewStartHandler(
 
 		defer func() {
 			if p := recover(); p != nil {
-				logger.Error("panic", "error", p)
+				logger.ErrorContext(ctx, "panic", "error", p)
 				rw.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -101,9 +101,9 @@ func NewStartHandler(
 				slog.Duration("cost", time.Now().Sub(startAt))}
 			if status >= 400 {
 				fields = append(fields, slog.String("body", string(w.Body())))
-				logger.Error("END", fields...)
+				logger.ErrorContext(ctx, "END", fields...)
 			} else {
-				logger.Info("END", fields...)
+				logger.InfoContext(ctx, "END", fields...)
 			}
 		}()
 
@@ -121,7 +121,7 @@ func NewStartHandler(
 					return
 				} else {
 					a.SetUserID(auth.UserID)
-					logger.Info("authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("appId", auth.AppID))
+					logger.InfoContext(ctx, "authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("appId", auth.AppID))
 				}
 			}
 			maybeNext.ServeHTTP(w, req)

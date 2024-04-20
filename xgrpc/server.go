@@ -11,7 +11,6 @@ import (
 	"go.olapie.com/x/xerror"
 	"go.olapie.com/x/xlog"
 	"go.olapie.com/x/xtype"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -51,7 +50,7 @@ func ServerStart(ctx context.Context,
 			fields = append(fields, slog.String(mdKey, mdVal[0]))
 		}
 	}
-	logger.Info("START", fields...)
+	logger.InfoContext(ctx, "START", fields...)
 
 	if !verifyAPIKey(ctx, md) {
 		attrs := make([]slog.Attr, 0, len(md))
@@ -60,7 +59,7 @@ func ServerStart(ctx context.Context,
 				attrs = append(attrs, slog.String(key, val[0]))
 			}
 		}
-		logger.Error("invalid api key", slog.Any("metadata", md))
+		logger.ErrorContext(ctx, "invalid api key", slog.Any("metadata", md))
 		return ctx, status.Error(codes.InvalidArgument, "failed to verify api key")
 	}
 
@@ -71,33 +70,33 @@ func ServerStart(ctx context.Context,
 			return ctx, status.Error(codes.Unauthenticated, "client appId does not match authenticated appId")
 		}
 		a.SetUserID(auth.UserID)
-		logger.Info("authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("appId", auth.AppID))
+		logger.InfoContext(ctx, "authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("appId", auth.AppID))
 	}
 	return ctx, nil
 }
 
-func ServerFinish(resp any, err error, logger *slog.Logger, startAt time.Time) (any, error) {
+func ServerFinish(ctx context.Context, resp any, err error, logger *slog.Logger, startAt time.Time) (any, error) {
 	if err == nil {
-		logger.Info("END", slog.Duration("cost", time.Now().Sub(startAt)))
+		logger.InfoContext(ctx, "END", slog.Duration("cost", time.Now().Sub(startAt)))
 		return resp, nil
 	}
 
 	if reflect.TypeOf(err) == statusErrorType {
-		logger.Error("END", xlog.Err(err))
+		logger.ErrorContext(ctx, "END", xlog.Err(err))
 		return nil, err
 	}
 
 	if s, ok := status.FromError(err); ok {
-		logger.Error("END", slog.Any("status", s), xlog.Err(err))
+		logger.ErrorContext(ctx, "END", slog.Any("status", s), xlog.Err(err))
 		return nil, err
 	}
 
 	if s := xerror.GetCode(err); s >= 100 && s < 600 {
 		code := HTTPStatusToCode(s)
-		logger.Info("END", slog.Int("status", s), slog.Int("code", int(code)), xlog.Err(err))
+		logger.InfoContext(ctx, "END", slog.Int("status", s), slog.Int("code", int(code)), xlog.Err(err))
 		return nil, status.Error(code, err.Error())
 	}
-	logger.Error("END", xlog.Err(err))
+	logger.ErrorContext(ctx, "END", xlog.Err(err))
 
 	return nil, err
 }

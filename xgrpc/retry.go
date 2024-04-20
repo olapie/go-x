@@ -50,7 +50,7 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 	logger := xlog.FromContext(ctx).With("module", "xgrpc").With("call", r.callName)
 	for i := 0; i < r.options.Count; i++ {
 		if i > 0 {
-			logger.Info(fmt.Sprintf("retrying %d", i))
+			logger.Debug(fmt.Sprintf("retrying %d", i))
 		}
 		out, err = r.call(ctx, in, options...)
 		if err == nil {
@@ -75,7 +75,7 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 			if r.options.RefreshAccessToken == nil {
 				return out, fmt.Errorf("failed to call: %w, and options.RefreshAccessToken is nil", err)
 			}
-			logger.Info("refreshing access token")
+			logger.DebugContext(ctx, "refreshing access token")
 			accessToken, err := r.options.RefreshAccessToken(ctx)
 
 			if err == nil {
@@ -84,7 +84,7 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 					return out, xerror.BadRequest("no outgoing activity")
 				}
 				act.SetAuthorization(accessToken)
-				logger.Info("refreshed access token successfully")
+				logger.DebugContext(ctx, "refreshed access token successfully")
 			} else {
 				if errors.Is(err, context.DeadlineExceeded) || ctx.Err() != nil {
 					return out, fmt.Errorf("failed to refresh access token due to context error: %w", err)

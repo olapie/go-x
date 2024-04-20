@@ -63,7 +63,7 @@ func signClientContext(ctx context.Context, createAPIKey func(md metadata.MD)) c
 	if traceID := xhttpheader.GetTraceID(md); traceID == "" {
 		if traceID == "" {
 			traceID = xbase62.NewUUIDString()
-			xlog.FromContext(ctx).Info("xgrpc.signClientContext: generated trace id " + traceID)
+			xlog.FromContext(ctx).InfoContext(ctx, "xgrpc.signClientContext: generated trace id "+traceID)
 		}
 		xhttpheader.SetTraceID(md, traceID)
 	}

@@ -83,8 +83,8 @@ func Open(ctx context.Context, options *OpenOptions) (*sql.DB, error) {
 		options = NewOpenOptions()
 	}
 	connString := options.String()
-	logger := xlog.FromCtx(ctx)
-	logger.Info("opening postgres",
+	logger := xlog.FromContext(ctx)
+	logger.Debug("opening postgres",
 		slog.String("user", options.User),
 		slog.String("database", options.Database),
 		slog.String("schema", options.Schema),
@@ -98,7 +98,7 @@ func Open(ctx context.Context, options *OpenOptions) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ping: %s, %w", connString, err)
 	}
-	logger.Info("opening postgres",
+	logger.Debug("opening postgres",
 		slog.String("user", options.User),
 		slog.String("database", options.Database),
 		slog.String("schema", options.Schema),
