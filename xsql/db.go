@@ -7,9 +7,9 @@ import (
 )
 
 type DBOptions struct {
-	User     string
-	Password string
-	Database string
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Database string `json:"database"`
 }
 
 var _tableNamerType = reflect.TypeOf((*tableNamer)(nil)).Elem()
