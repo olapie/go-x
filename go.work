@@ -21,6 +21,7 @@ use (
 	./xsession
 	./xsql
 	./xsqlite
+	./xsync
 	./xterm
 	./xtest
 	./xtype
