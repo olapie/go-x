@@ -6,6 +6,12 @@ import (
 	"reflect"
 )
 
+type DBOptions struct {
+	User     string
+	Password string
+	Database string
+}
+
 var _tableNamerType = reflect.TypeOf((*tableNamer)(nil)).Elem()
 
 type DB struct {
