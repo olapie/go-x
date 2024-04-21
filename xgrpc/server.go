@@ -2,6 +2,7 @@ package xgrpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"reflect"
@@ -96,7 +97,10 @@ func ServerFinish(ctx context.Context, resp any, err error, logger *slog.Logger,
 		logger.InfoContext(ctx, "END", slog.Int("status", s), slog.Int("code", int(code)), xlog.Err(err))
 		return nil, status.Error(code, err.Error())
 	}
-	logger.ErrorContext(ctx, "END", xlog.Err(err))
 
+	if errors.Is(err, xerror.DBNoRecords) {
+		err = status.Error(codes.NotFound, err.Error())
+	}
+	logger.ErrorContext(ctx, "END", xlog.Err(err))
 	return nil, err
 }
