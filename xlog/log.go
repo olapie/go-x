@@ -19,7 +19,7 @@ func Init(filename string, opts ...func(options *slog.HandlerOptions)) io.Closer
 		opt(options)
 	}
 
-	if isDebugging() {
+	if IsDebugging() {
 		options.Level = slog.LevelDebug
 	}
 
@@ -39,7 +39,7 @@ func Init(filename string, opts ...func(options *slog.HandlerOptions)) io.Closer
 	return f
 }
 
-func isDebugging() bool {
+func IsDebugging() bool {
 	debug := strings.ToLower(os.Getenv(EnvDebug))
 	return debug == "1" || debug == "true" || debug == "enabled"
 }
