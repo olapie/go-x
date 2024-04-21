@@ -101,7 +101,7 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 					codes.Unauthenticated:
 					return out, fmt.Errorf("failed to refresh access token: %w", err)
 				}
-				logger.Error("failed to refresh access token: %v", err)
+				logger.Error("failed to refresh access token", xlog.Err(err))
 			}
 		default:
 			time.Sleep(r.options.Backoff)
