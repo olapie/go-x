@@ -180,3 +180,18 @@ func IsURL(s string) bool {
 	}
 	return u.String() != ""
 }
+
+func SetQuery(urlString string, key, value string) (string, error) {
+	u, err := url.Parse(urlString)
+	if err != nil {
+		return "", err
+	}
+	q := u.Query()
+	q.Set(key, value)
+
+	i := strings.Index(urlString, "?")
+	if i < 0 {
+		return urlString + "?" + q.Encode(), nil
+	}
+	return urlString[:i+1] + q.Encode(), nil
+}
