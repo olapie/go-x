@@ -6,6 +6,7 @@ require (
 	github.com/jackc/pgx/v5 v5.5.5
 	go.olapie.com/x/xconv v0.1.3
 	go.olapie.com/x/xlog v0.1.0
+	go.olapie.com/x/xurl v0.1.2
 )
 
 require (
