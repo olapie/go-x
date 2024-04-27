@@ -9,6 +9,9 @@ import (
 	"os/user"
 	"sync"
 
+	_ "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"go.olapie.com/x/xlog"
 )
 
@@ -89,11 +92,16 @@ func Open(ctx context.Context, options *OpenOptions) (*sql.DB, error) {
 		slog.String("database", options.Database),
 		slog.String("schema", options.Schema),
 		slog.Bool("unix_socket", options.UnixSocket))
-	db, err := sql.Open("postgres", connString)
+	//db, err := sql.Open("postgres", connString)
+	//if err != nil {
+	//	return nil, fmt.Errorf("open: %s, %w", connString, err)
+	//}
+
+	pool, err := pgxpool.New(ctx, connString)
 	if err != nil {
 		return nil, fmt.Errorf("open: %s, %w", connString, err)
 	}
-
+	db := stdlib.OpenDBFromPool(pool)
 	err = db.PingContext(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("ping: %s, %w", connString, err)

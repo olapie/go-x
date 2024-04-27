@@ -2,23 +2,22 @@ package xpostgres
 
 import (
 	"database/sql"
-
-	"github.com/lib/pq/hstore"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func mapToHstore(m map[string]string) hstore.Hstore {
-	var h hstore.Hstore
+func mapToHstore(m map[string]string) pgtype.Hstore {
+	var h pgtype.Hstore
 	for k, v := range m {
-		h.Map[k] = sql.NullString{String: v}
+		h[k] = &v
 	}
 	return h
 }
 
-func hstoreToMap(h hstore.Hstore) map[string]string {
-	m := make(map[string]string, len(h.Map))
-	for k, v := range h.Map {
-		if v.Valid {
-			m[k] = v.String
+func hstoreToMap(h pgtype.Hstore) map[string]string {
+	m := make(map[string]string, len(h))
+	for k, v := range h {
+		if v != nil {
+			m[k] = *v
 		}
 	}
 	return m
@@ -34,7 +33,7 @@ func (hs *hstoreScanner) Scan(src any) error {
 	if src == nil {
 		return nil
 	}
-	var h hstore.Hstore
+	var h pgtype.Hstore
 	err := h.Scan(src)
 	if err != nil {
 		return err
