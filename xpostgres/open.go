@@ -99,19 +99,19 @@ type RepoFactory[T any] interface {
 type NewRepoFunc[T any] func(ctx context.Context, db *sql.DB) T
 
 type repoFactoryImpl[T any] struct {
-	mu                sync.RWMutex
-	cache             map[string]T
-	connStringBuilder *ConnStringBuilder
-	config            *Config
-	fn                NewRepoFunc[T]
+	mu         sync.RWMutex
+	cache      map[string]T
+	connString string
+	config     *Config
+	fn         NewRepoFunc[T]
 }
 
-func NewRepoFactory[T any](connStringBuilder *ConnStringBuilder, config *Config, fn NewRepoFunc[T]) RepoFactory[T] {
+func NewRepoFactory[T any](connString string, config *Config, fn NewRepoFunc[T]) RepoFactory[T] {
 	f := &repoFactoryImpl[T]{
-		connStringBuilder: connStringBuilder,
-		config:            config,
-		cache:             make(map[string]T),
-		fn:                fn,
+		connString: connString,
+		config:     config,
+		cache:      make(map[string]T),
+		fn:         fn,
 	}
 	return f
 }
@@ -131,14 +131,12 @@ func (f *repoFactoryImpl[T]) Get(ctx context.Context, schema string) T {
 		return repo
 	}
 
-	connStringBuilder := *f.connStringBuilder
-	connStringBuilder.schema = schema
-	connStr := connStringBuilder.Build()
-	if dbVal, ok := connStringToDBCache.Load(connStr); ok {
+	connString := SetParameterInConnString(f.connString, "search_path", schema)
+	if dbVal, ok := connStringToDBCache.Load(connString); ok {
 		repo = f.fn(ctx, dbVal.(*sql.DB))
 	} else {
-		db := MustOpen(ctx, connStr, f.config)
-		connStringToDBCache.Store(connStr, db)
+		db := MustOpen(ctx, connString, f.config)
+		connStringToDBCache.Store(connString, db)
 		repo = f.fn(ctx, db)
 	}
 	f.cache[schema] = repo
