@@ -2,6 +2,7 @@ package xpostgres
 
 import (
 	"database/sql"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 

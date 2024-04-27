@@ -4,100 +4,66 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log/slog"
-	"net/url"
-	"os/user"
 	"sync"
+	"time"
 
+	"github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"go.olapie.com/x/xlog"
 )
 
-type OpenOptions struct {
-	UnixSocket bool
-	Host       string
-	Port       int
-	User       string
-	Password   string
-	Database   string
-	Schema     string
-	SSL        bool
+type Config struct {
+	// MaxConnLifetime is the duration since creation after which a connection will be automatically closed.
+	MaxConnLifetime time.Duration
+
+	// MaxConnLifetimeJitter is the duration after MaxConnLifetime to randomly decide to close a connection.
+	// This helps prevent all connections from being closed at the exact same time, starving the pool.
+	MaxConnLifetimeJitter time.Duration
+
+	// MaxConnIdleTime is the duration after which an idle connection will be automatically closed by the health check.
+	MaxConnIdleTime time.Duration
+
+	// MaxConns is the maximum size of the pool. The default is the greater of 4 or runtime.NumCPU().
+	MaxConns int32
+
+	// MinConns is the minimum size of the pool. After connection closes, the pool might dip below MinConns. A low
+	// number of MinConns might mean the pool is empty after MaxConnLifetime until the health check has a chance
+	// to create new connections.
+	MinConns int32
+
+	// HealthCheckPeriod is the duration between checks of the health of idle connections.
+	HealthCheckPeriod time.Duration
 }
 
-func NewOpenOptions() *OpenOptions {
-	return &OpenOptions{
-		Host: "localhost",
-		Port: 5432,
-	}
-}
-
-func (c *OpenOptions) String() string {
-	if c.UnixSocket {
-		u, err := user.Current()
-		if err != nil {
-			return ""
-		}
-		if c.Schema == "" {
-			return fmt.Sprintf("postgres:///%s?host=/var/run/postgresql/", u.Username)
-		} else {
-			return fmt.Sprintf("postgres:///%s?host=/var/run/postgresql/&search_path=%s", u.Username, c.Schema)
-		}
-	}
-	host := c.Host
-	port := c.Port
-	if host == "" {
-		host = "localhost"
-	}
-
-	if port == 0 {
-		port = 5432
-	}
-
-	connStr := fmt.Sprintf("%s:%d", host, port)
-	if c.Database != "" {
-		connStr += "/" + c.Database
-	}
-	if c.User == "" {
-		connStr = "postgres://" + connStr
-	} else {
-		if c.Password == "" {
-			connStr = "postgres://" + c.User + "@" + connStr
-		} else {
-			connStr = "postgres://" + c.User + ":" + c.Password + "@" + connStr
-		}
-	}
-	query := url.Values{}
-	if !c.SSL {
-		query.Add("sslmode", "disable")
-	}
-	if c.Schema != "" {
-		query.Add("search_path", c.Schema)
-	}
-	if len(query) == 0 {
-		return connStr
-	}
-	return connStr + "?" + query.Encode()
-}
-
-func Open(ctx context.Context, options *OpenOptions) (*sql.DB, error) {
-	if options == nil {
-		options = NewOpenOptions()
-	}
-	connString := options.String()
+func Open(ctx context.Context, connString string, config *Config) (*sql.DB, error) {
 	logger := xlog.FromContext(ctx)
-	logger.Debug("opening postgres",
-		slog.String("user", options.User),
-		slog.String("database", options.Database),
-		slog.String("schema", options.Schema),
-		slog.Bool("unix_socket", options.UnixSocket))
+	logger.Debug("opening postgres: " + connString)
 	//db, err := sql.Open("postgres", connString)
 	//if err != nil {
 	//	return nil, fmt.Errorf("open: %s, %w", connString, err)
 	//}
 
-	pool, err := pgxpool.New(ctx, connString)
+	connConfig, err := pgx.ParseConfig(connString)
+	if err != nil {
+		return nil, fmt.Errorf("pars connection string: %w", err)
+	}
+
+	poolConfig := &pgxpool.Config{
+		ConnConfig: connConfig,
+	}
+
+	if config != nil {
+		poolConfig.MaxConns = config.MaxConns
+		poolConfig.MinConns = config.MinConns
+		poolConfig.MaxConnIdleTime = config.MaxConnIdleTime
+		poolConfig.MaxConnLifetimeJitter = config.MaxConnLifetimeJitter
+		poolConfig.MaxConnLifetime = config.MaxConnLifetime
+		poolConfig.HealthCheckPeriod = config.HealthCheckPeriod
+	}
+
+	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		return nil, fmt.Errorf("open: %s, %w", connString, err)
 	}
@@ -106,23 +72,18 @@ func Open(ctx context.Context, options *OpenOptions) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ping: %s, %w", connString, err)
 	}
-	logger.Debug("opening postgres",
-		slog.String("user", options.User),
-		slog.String("database", options.Database),
-		slog.String("schema", options.Schema),
-		slog.Bool("unix_socket", options.UnixSocket))
 	return db, nil
 }
 
-func MustOpen(ctx context.Context, options *OpenOptions) *sql.DB {
-	return MustGet(Open(ctx, options))
+func MustOpen(ctx context.Context, connString string, config *Config) *sql.DB {
+	return MustGet(Open(ctx, connString, config))
 }
 
 func OpenLocal(ctx context.Context) (*sql.DB, error) {
-	if db, err := Open(ctx, &OpenOptions{UnixSocket: true}); err == nil {
+	if db, err := Open(ctx, NewURLBuilder().Build(), nil); err == nil {
 		return db, nil
 	}
-	return Open(ctx, NewOpenOptions())
+	return Open(ctx, NewURLBuilder().UseUnixSocket(true).Build(), nil)
 }
 
 func MustOpenLocal(ctx context.Context) *sql.DB {
@@ -138,17 +99,19 @@ type RepoFactory[T any] interface {
 type NewRepoFunc[T any] func(ctx context.Context, db *sql.DB) T
 
 type repoFactoryImpl[T any] struct {
-	mu      sync.RWMutex
-	cache   map[string]T
-	options *OpenOptions
-	fn      NewRepoFunc[T]
+	mu         sync.RWMutex
+	cache      map[string]T
+	urlBuilder *URLBuilder
+	config     *Config
+	fn         NewRepoFunc[T]
 }
 
-func NewRepoFactory[T any](options *OpenOptions, fn NewRepoFunc[T]) RepoFactory[T] {
+func NewRepoFactory[T any](urlBuilder *URLBuilder, config *Config, fn NewRepoFunc[T]) RepoFactory[T] {
 	f := &repoFactoryImpl[T]{
-		options: options,
-		cache:   make(map[string]T),
-		fn:      fn,
+		urlBuilder: urlBuilder,
+		config:     config,
+		cache:      make(map[string]T),
+		fn:         fn,
 	}
 	return f
 }
@@ -168,13 +131,13 @@ func (f *repoFactoryImpl[T]) Get(ctx context.Context, schema string) T {
 		return repo
 	}
 
-	opt := *f.options
-	opt.Schema = schema
-	connStr := opt.String()
+	urlBuilder := *f.urlBuilder
+	urlBuilder.schema = schema
+	connStr := urlBuilder.Build()
 	if dbVal, ok := connStringToDBCache.Load(connStr); ok {
 		repo = f.fn(ctx, dbVal.(*sql.DB))
 	} else {
-		db := MustOpen(ctx, &opt)
+		db := MustOpen(ctx, connStr, f.config)
 		connStringToDBCache.Store(connStr, db)
 		repo = f.fn(ctx, db)
 	}
