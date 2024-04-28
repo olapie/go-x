@@ -8,7 +8,7 @@ import (
 )
 
 func MapToHstore[K, V ~string](m map[K]V) pgtype.Hstore {
-	var h pgtype.Hstore
+	h := make(pgtype.Hstore, len(m))
 	for k, v := range m {
 		h[string(k)] = xconv.Pointer(string(v))
 	}
