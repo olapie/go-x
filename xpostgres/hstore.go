@@ -4,21 +4,22 @@ import (
 	"database/sql"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"go.olapie.com/x/xconv"
 )
 
-func MapToHstore(m map[string]string) pgtype.Hstore {
+func MapToHstore[K, V ~string](m map[K]V) pgtype.Hstore {
 	var h pgtype.Hstore
 	for k, v := range m {
-		h[k] = &v
+		h[string(k)] = xconv.Pointer(string(v))
 	}
 	return h
 }
 
-func HstoreToMap(h pgtype.Hstore) map[string]string {
-	m := make(map[string]string, len(h))
+func HstoreToMap[K, V ~string](h pgtype.Hstore) map[K]V {
+	m := make(map[K]V, len(h))
 	for k, v := range h {
 		if v != nil {
-			m[k] = *v
+			m[K(k)] = V(*v)
 		}
 	}
 	return m
@@ -39,7 +40,7 @@ func (hs *hstoreScanner) Scan(src any) error {
 	if err != nil {
 		return err
 	}
-	m := HstoreToMap(h)
+	m := HstoreToMap[string, string](h)
 	*hs.m = m
 	return nil
 }
