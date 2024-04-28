@@ -68,6 +68,7 @@ func (b *ConnStringBuilder) Secure(secure bool) *ConnStringBuilder {
 
 func (b *ConnStringBuilder) Build() string {
 	if b.useUnixDomainSocket {
+		params := map[string]string{}
 		username := b.user
 		if username == "" {
 			u, err := user.Current()
@@ -76,15 +77,28 @@ func (b *ConnStringBuilder) Build() string {
 			}
 			username = u.Username
 		}
+		params["user"] = username
 		port := 5432
 		if b.port != 0 {
 			port = b.port
 		}
-		if b.schema == "" {
-			return fmt.Sprintf("host=/tmp port=%d user=%s", port, username)
-		} else {
-			return fmt.Sprintf("host=/tmp port=%d user=%s search_path=%s", port, username, b.schema)
+		params["port"] = fmt.Sprint(port)
+		if b.schema != "" {
+			params["search_path"] = b.schema
 		}
+
+		if b.db != "" {
+			params["database"] = b.db
+		}
+
+		s := strings.Builder{}
+		for k, v := range params {
+			if s.Len() > 0 {
+				s.WriteByte(' ')
+			}
+			s.WriteString(fmt.Sprintf("%s=%v", k, v))
+		}
+		return s.String()
 	}
 	host := b.host
 	port := b.port
