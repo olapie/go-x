@@ -42,7 +42,7 @@ func Value[T supportedScanTypes](v T) driver.Valuer {
 	case *FullName:
 		return &fullNameValuer{v: val}
 	case map[string]string:
-		return mapToHstore(val)
+		return MapToHstore(val)
 	default:
 		panic(fmt.Sprintf("unsupported scan type: %T", v))
 	}

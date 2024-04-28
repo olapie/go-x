@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func mapToHstore(m map[string]string) pgtype.Hstore {
+func MapToHstore(m map[string]string) pgtype.Hstore {
 	var h pgtype.Hstore
 	for k, v := range m {
 		h[k] = &v
@@ -14,7 +14,7 @@ func mapToHstore(m map[string]string) pgtype.Hstore {
 	return h
 }
 
-func hstoreToMap(h pgtype.Hstore) map[string]string {
+func HstoreToMap(h pgtype.Hstore) map[string]string {
 	m := make(map[string]string, len(h))
 	for k, v := range h {
 		if v != nil {
@@ -39,7 +39,7 @@ func (hs *hstoreScanner) Scan(src any) error {
 	if err != nil {
 		return err
 	}
-	m := hstoreToMap(h)
+	m := HstoreToMap(h)
 	*hs.m = m
 	return nil
 }
