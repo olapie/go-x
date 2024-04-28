@@ -1,8 +1,6 @@
 package xbase36
 
 import (
-	"encoding/base64"
-	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -10,15 +8,21 @@ import (
 )
 
 func TestEncodeToString(t *testing.T) {
-	t.Run("UUID", func(t *testing.T) {
-		id := uuid.New()
-		idStr := EncodeToString(id[:])
-		t.Log(idStr)
-		t.Log(base64.StdEncoding.EncodeToString(id[:]))
-		t.Log(strings.ReplaceAll(id.String(), "-", ""))
-		t.Log(id.String())
-		parsed, err := DecodeString(idStr)
-		xtest.NoError(t, err)
-		xtest.Equal(t, id[:], parsed)
+	t.Run("Decode", func(t *testing.T) {
+		for range 20 {
+			id := uuid.New()
+			idStr := EncodeToString(id[:])
+			parsed, err := DecodeString(idStr)
+			xtest.NoError(t, err)
+			xtest.Equal(t, id[:], parsed)
+		}
+	})
+
+	t.Run("Parse", func(t *testing.T) {
+		for range 20 {
+			idStr := NewUUIDString()
+			_, err := UUIDFromString(idStr)
+			xtest.NoError(t, err)
+		}
 	})
 }
