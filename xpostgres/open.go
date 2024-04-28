@@ -7,8 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	_ "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"go.olapie.com/x/xlog"
@@ -37,7 +35,7 @@ type Config struct {
 	HealthCheckPeriod time.Duration
 }
 
-func Open(ctx context.Context, connString string, config *Config) (*sql.DB, error) {
+func NewPool(ctx context.Context, connString string, config *Config) (*pgxpool.Pool, error) {
 	logger := xlog.FromContext(ctx)
 	logger.Debug("opening postgres: " + connString)
 	//db, err := sql.Open("postgres", connString)
@@ -45,13 +43,9 @@ func Open(ctx context.Context, connString string, config *Config) (*sql.DB, erro
 	//	return nil, fmt.Errorf("open: %s, %w", connString, err)
 	//}
 
-	connConfig, err := pgx.ParseConfig(connString)
+	poolConfig, err := pgxpool.ParseConfig(connString)
 	if err != nil {
-		return nil, fmt.Errorf("pars connection string: %w", err)
-	}
-
-	poolConfig := &pgxpool.Config{
-		ConnConfig: connConfig,
+		return nil, fmt.Errorf("pgxpool.ParseConfig: %w", err)
 	}
 
 	if config != nil {
@@ -63,7 +57,11 @@ func Open(ctx context.Context, connString string, config *Config) (*sql.DB, erro
 		poolConfig.HealthCheckPeriod = config.HealthCheckPeriod
 	}
 
-	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	return pgxpool.NewWithConfig(ctx, poolConfig)
+}
+
+func Open(ctx context.Context, connString string, config *Config) (*sql.DB, error) {
+	pool, err := NewPool(ctx, connString, config)
 	if err != nil {
 		return nil, fmt.Errorf("open: %s, %w", connString, err)
 	}
