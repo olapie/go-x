@@ -2,10 +2,11 @@ package xpostgres
 
 import (
 	"fmt"
-	"go.olapie.com/x/xurl"
 	"net/url"
 	"os/user"
 	"strings"
+
+	"go.olapie.com/x/xurl"
 )
 
 type ConnStringBuilder struct {
