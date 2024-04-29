@@ -3,26 +3,16 @@ package xbase36
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"go.olapie.com/x/xtest"
 )
 
-func TestEncodeToString(t *testing.T) {
-	t.Run("Decode", func(t *testing.T) {
-		for range 20 {
-			id := uuid.New()
-			idStr := EncodeToString(id[:])
-			parsed, err := DecodeString(idStr)
-			xtest.NoError(t, err)
-			xtest.Equal(t, id[:], parsed)
-		}
-	})
+func TestUUIDFromString(t *testing.T) {
+	for range 200 {
+		s1 := NewUUIDString()
+		id, err := UUIDFromString(s1)
+		xtest.NoError(t, err)
 
-	t.Run("Parse", func(t *testing.T) {
-		for range 20 {
-			idStr := NewUUIDString()
-			_, err := UUIDFromString(idStr)
-			xtest.NoError(t, err)
-		}
-	})
+		s2 := EncodeToString(id[:])
+		xtest.Equal(t, s1, s2)
+	}
 }

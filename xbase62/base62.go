@@ -15,7 +15,7 @@ func EncodeToString(src []byte) string {
 		return ""
 	}
 	var i big.Int
-	i.SetBytes(src)
+	i.SetBytes(src) // leading zeros will be ignored, so DecodeString won't output same bytes
 	return i.Text(base)
 }
 
@@ -60,5 +60,7 @@ func UUIDFromString(s string) (id uuid.UUID, err error) {
 	if err != nil {
 		return id, err
 	}
-	return uuid.FromBytes(b)
+	copy(id[len(id)-len(b):], b[:])
+	//return uuid.FromBytes(b)
+	return id, nil
 }

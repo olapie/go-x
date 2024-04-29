@@ -1,27 +1,21 @@
 package xbase62
 
 import (
-	"encoding/base64"
 	"math/rand"
-	"strings"
 	"testing"
 
-	"github.com/google/uuid"
 	"go.olapie.com/x/xtest"
 )
 
-func TestEncodeToString(t *testing.T) {
-	t.Run("UUID", func(t *testing.T) {
-		id := uuid.New()
-		idStr := EncodeToString(id[:])
-		t.Log(idStr)
-		t.Log(base64.StdEncoding.EncodeToString(id[:]))
-		t.Log(strings.ReplaceAll(id.String(), "-", ""))
-		t.Log(id.String())
-		parsed, err := DecodeString(idStr)
+func TestUUIDFromString(t *testing.T) {
+	for range 200 {
+		s1 := NewUUIDString()
+		id, err := UUIDFromString(s1)
 		xtest.NoError(t, err)
-		xtest.Equal(t, id[:], parsed)
-	})
+
+		s2 := EncodeToString(id[:])
+		xtest.Equal(t, s1, s2)
+	}
 }
 
 func TestAtoi(t *testing.T) {
