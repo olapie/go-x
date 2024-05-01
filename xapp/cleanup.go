@@ -1,6 +1,7 @@
 package xapp
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -12,8 +13,9 @@ func CleanUp(f func()) {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		received := <-c
-		slog.Info(received.String())
+		slog.Info(fmt.Sprintf("received signal %v", received))
 		f()
+		slog.Info("shutting down server")
 		if sig, ok := received.(syscall.Signal); ok {
 			os.Exit(int(sig))
 		} else {
