@@ -1,11 +1,14 @@
 package xconv
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 func MustToJSONBytes(v any) []byte {
 	data, err := json.Marshal(v)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("json marshal: %w", err))
 	}
 	return data
 }
@@ -13,14 +16,14 @@ func MustToJSONBytes(v any) []byte {
 func MustFromJSONBytes(b []byte, v any) {
 	err := json.Unmarshal(b, v)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("unmarshal json: %w", err))
 	}
 }
 
 func MustToJSONString(v any) string {
 	b, err := json.Marshal(v)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("json marshal: %w", err))
 	}
 	return string(b)
 }
@@ -28,6 +31,6 @@ func MustToJSONString(v any) string {
 func MustFromJSONString(s string, v any) {
 	err := json.Unmarshal([]byte(s), v)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("unmarshal json: %w", err))
 	}
 }
