@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// var _ encoding.TextMarshaler = (*Decimal)(nil)
+var _ encoding.TextMarshaler = (*Decimal)(nil)
 var _ encoding.TextMarshaler = Decimal{}
 var _ encoding.TextUnmarshaler = (*Decimal)(nil)
 
@@ -30,13 +30,13 @@ func NewDecimalFromString(s string) (*Decimal, error) {
 
 	n := len(s)
 
-	k := -1
+	pointPos := -1
 	for i := range n {
 		if s[i] == '.' {
-			if k >= 0 {
+			if pointPos >= 0 {
 				return nil, fmt.Errorf("unexpected decimal point at %d", i)
 			}
-			k = i
+			pointPos = i
 		} else {
 			if s[i] < '0' || s[i] > '9' {
 				return nil, fmt.Errorf("invalid digit %v at %d", s[i], i)
@@ -44,7 +44,7 @@ func NewDecimalFromString(s string) (*Decimal, error) {
 		}
 	}
 
-	if k < 0 {
+	if pointPos < 0 {
 		intVal, ok := big.NewInt(0).SetString(s, 10)
 		if !ok {
 			return nil, fmt.Errorf("invalid integer part")
@@ -55,8 +55,8 @@ func NewDecimalFromString(s string) (*Decimal, error) {
 		}, nil
 	}
 
-	integerPart := trimLeadingZeros(s[:k])
-	fractionalPart := trimTrailingZeros(s[k+1:])
+	integerPart := trimLeadingZeros(s[:pointPos])
+	fractionalPart := trimTrailingZeros(s[pointPos+1:])
 
 	v, ok := big.NewInt(0).SetString(integerPart+fractionalPart, 10)
 	if !ok {

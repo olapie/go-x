@@ -13,7 +13,7 @@ func TestNewDecimalFromString(t *testing.T) {
 		DecimalString string
 	}
 
-	tests := []TestCase{
+	happyCases := []TestCase{
 		{
 			String:        "0",
 			DecimalString: "0",
@@ -28,6 +28,18 @@ func TestNewDecimalFromString(t *testing.T) {
 		},
 		{
 			String:        "0.00000",
+			DecimalString: "0",
+		},
+		{
+			String:        "000.00000",
+			DecimalString: "0",
+		},
+		{
+			String:        "000.0",
+			DecimalString: "0",
+		},
+		{
+			String:        "000.",
 			DecimalString: "0",
 		},
 		{
@@ -72,7 +84,7 @@ func TestNewDecimalFromString(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
+	for _, test := range happyCases {
 		d, err := NewDecimalFromString(test.String)
 		if err != nil {
 			t.Fatalf("%s: %v", test.String, err)
@@ -98,66 +110,62 @@ func TestNewDecimalFromString(t *testing.T) {
 	}
 }
 
-func TestMarshalDecimalJSON(t *testing.T) {
+func TestDecimalJSONMarshal(t *testing.T) {
 	type Item struct {
 		Price Decimal `json:"price"`
 	}
 
-	s := fmt.Sprint(rand.Float64())
-	d, err := NewDecimalFromString(s)
+	decimalString := fmt.Sprint(rand.Float64())
+	decimal, err := NewDecimalFromString(decimalString)
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := Item{
-		Price: *d,
-	}
 
-	jsonBytes, err := json.Marshal(i)
+	jsonBytes, err := json.Marshal(Item{
+		Price: *decimal,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(string(jsonBytes))
 
-	var item2 Item
-	err = json.Unmarshal(jsonBytes, &item2)
+	var item Item
+	err = json.Unmarshal(jsonBytes, &item)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.Log(item2.Price.String())
-	if item2.Price.String() != s {
-		t.Fatal(item2.Price.String(), s)
+	t.Log(item.Price.String())
+	if item.Price.String() != decimalString {
+		t.Fatal(item.Price.String(), decimalString)
 	}
 }
 
-func TestMarshalDecimalJSON2(t *testing.T) {
+func TestDecimalJSONMarshal_Pointer(t *testing.T) {
 	type Item struct {
 		Price *Decimal `json:"price"`
 	}
 
-	s := fmt.Sprint(rand.Float64())
-	d, err := NewDecimalFromString(s)
+	decimalString := fmt.Sprint(rand.Float64())
+	decimal, err := NewDecimalFromString(decimalString)
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := Item{
-		Price: d,
-	}
 
-	jsonBytes, err := json.Marshal(i)
+	jsonBytes, err := json.Marshal(Item{
+		Price: decimal,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(string(jsonBytes))
 
-	var item2 Item
-	err = json.Unmarshal(jsonBytes, &item2)
+	var item Item
+	err = json.Unmarshal(jsonBytes, &item)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.Log(item2.Price.String())
-	if item2.Price.String() != s {
-		t.Fatal(item2.Price.String(), s)
+	t.Log(item.Price.String())
+	if item.Price.String() != decimalString {
+		t.Fatal(item.Price.String(), decimalString)
 	}
 }
