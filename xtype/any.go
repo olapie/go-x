@@ -126,12 +126,12 @@ func (a *Any) Text() string {
 
 const (
 	keyAnyType = "@t"
-	keyAnyVal  = "@v"
+	keyAnyVal  = "@Int"
 )
 
 type anyJsonObject struct {
 	Type  string          `json:"@t"`
-	Value json.RawMessage `json:"@v"`
+	Value json.RawMessage `json:"@Int"`
 }
 
 func (a *Any) UnmarshalJSON(b []byte) error {

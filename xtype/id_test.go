@@ -6,11 +6,11 @@ import (
 )
 
 func TestID(t *testing.T) {
-	for i := 0; i < 256; i++ {
-		id := NextID()
-		t.Logf("%d %0X %s", id, id, id.Base62())
-		//time.Sleep(time.Millisecond * 1)
-	}
+	//for i := 0; i < 256; i++ {
+	//	id := NextID()
+	//	t.Logf("%d %0X %s", id, id, id.Base62())
+	//	//time.Sleep(time.Millisecond * 1)
+	//}
 
 	var id ID = 123
 	if id.Base62() != "1Z" {
@@ -33,11 +33,11 @@ func TestID(t *testing.T) {
 }
 
 func TestID_Base36(t *testing.T) {
-	for i := 0; i < 256; i++ {
-		id := NextID()
-		t.Logf("%d %0X %s", id, id, id.Base36())
-		//time.Sleep(time.Millisecond * 1)
-	}
+	//for i := 0; i < 256; i++ {
+	//	id := NextID()
+	//	t.Logf("%d %0X %s", id, id, id.Base36())
+	//	//time.Sleep(time.Millisecond * 1)
+	//}
 
 	var id ID = 123
 	if id.Base36() != "3f" {
