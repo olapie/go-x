@@ -1,6 +1,11 @@
 package xtype
 
-import "testing"
+import (
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"testing"
+)
 
 func TestNewDecimalFromString(t *testing.T) {
 	type TestCase struct {
@@ -90,5 +95,69 @@ func TestNewDecimalFromString(t *testing.T) {
 		if d != nil {
 			t.Fatalf("expected nil for %s", test)
 		}
+	}
+}
+
+func TestMarshalDecimalJSON(t *testing.T) {
+	type Item struct {
+		Price Decimal `json:"price"`
+	}
+
+	s := fmt.Sprint(rand.Float64())
+	d, err := NewDecimalFromString(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	i := Item{
+		Price: *d,
+	}
+
+	jsonBytes, err := json.Marshal(i)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(jsonBytes))
+
+	var item2 Item
+	err = json.Unmarshal(jsonBytes, &item2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(item2.Price.String())
+	if item2.Price.String() != s {
+		t.Fatal(item2.Price.String(), s)
+	}
+}
+
+func TestMarshalDecimalJSON2(t *testing.T) {
+	type Item struct {
+		Price *Decimal `json:"price"`
+	}
+
+	s := fmt.Sprint(rand.Float64())
+	d, err := NewDecimalFromString(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	i := Item{
+		Price: d,
+	}
+
+	jsonBytes, err := json.Marshal(i)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(jsonBytes))
+
+	var item2 Item
+	err = json.Unmarshal(jsonBytes, &item2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(item2.Price.String())
+	if item2.Price.String() != s {
+		t.Fatal(item2.Price.String(), s)
 	}
 }

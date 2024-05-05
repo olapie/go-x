@@ -1,10 +1,15 @@
 package xtype
 
 import (
+	"encoding"
 	"fmt"
 	"math/big"
 	"strings"
 )
+
+// var _ encoding.TextMarshaler = (*Decimal)(nil)
+var _ encoding.TextMarshaler = Decimal{}
+var _ encoding.TextUnmarshaler = (*Decimal)(nil)
 
 type Decimal struct {
 	Int *big.Int
@@ -78,6 +83,20 @@ func (d *Decimal) String() string {
 		return fmt.Sprintf("0.%s%s", strings.Repeat("0", -k), s)
 	}
 	return fmt.Sprintf("%s.%s", s[:k], s[k:])
+}
+
+func (d Decimal) MarshalText() (text []byte, err error) {
+	return []byte(d.String()), nil
+}
+
+func (d *Decimal) UnmarshalText(text []byte) error {
+	v, err := NewDecimalFromString(string(text))
+	if err != nil {
+		return err
+	}
+	d.Int = v.Int
+	d.Exp = v.Exp
+	return nil
 }
 
 func trimLeadingZeros(s string) string {
