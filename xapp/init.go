@@ -3,8 +3,9 @@ package xapp
 import (
 	"flag"
 	"fmt"
-	"go.olapie.com/x/xlog"
 	"log/slog"
+
+	"go.olapie.com/x/xlog"
 )
 
 func Initialize(appName string, httpServerAddr, grpcServerAddr *string) {
