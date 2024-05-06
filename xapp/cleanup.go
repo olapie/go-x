@@ -13,9 +13,8 @@ func CleanUp(f func()) {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		received := <-c
-		slog.Info(fmt.Sprintf("received signal %v", received))
+		slog.Info(fmt.Sprintf("received signal %v, will shutdown server", received))
 		f()
-		slog.Info("shutting down server")
 		if sig, ok := received.(syscall.Signal); ok {
 			os.Exit(int(sig))
 		} else {
