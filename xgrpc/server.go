@@ -8,8 +8,10 @@ import (
 	"reflect"
 	"time"
 
+	"go.olapie.com/security/base62"
 	"go.olapie.com/x/xcontext"
 	"go.olapie.com/x/xerror"
+	"go.olapie.com/x/xhttpheader"
 	"go.olapie.com/x/xlog"
 	"go.olapie.com/x/xtype"
 	"google.golang.org/grpc"
@@ -18,65 +20,71 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var metadataKeysForLogging = []string{"x-client-id", "x-app-id"}
+type PreHandleOptions struct {
+	APIKeyVerifierFunc func(ctx context.Context, md metadata.MD) bool
+	AuthenticatorFunc  func(ctx context.Context, md metadata.MD) *xtype.AuthResult
+	HeadersRequired    []string
+	HeadersForLogging  []string
+}
 
-func ServerStart(ctx context.Context,
-	info *grpc.UnaryServerInfo,
-	verifyAPIKey func(ctx context.Context, md metadata.MD) bool,
-	authenticate func(ctx context.Context, md metadata.MD) *xtype.AuthResult) (context.Context, error) {
+var defaultPreHandleOptions = PreHandleOptions{
+	HeadersForLogging: []string{xhttpheader.LowerKeyClientID, xhttpheader.LowerKeyAppID},
+}
+
+func PreHandle(ctx context.Context, info *grpc.UnaryServerInfo, optFns ...func(options *PreHandleOptions)) (context.Context, error) {
+	options := defaultPreHandleOptions
+	for _, fn := range optFns {
+		fn(&options)
+	}
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return ctx, status.Error(codes.InvalidArgument, "failed to read request metadata")
 	}
 
-	a := xcontext.NewActivity(info.FullMethod, md)
-	appID := a.GetAppID()
-	if appID == "" {
-		return ctx, status.Error(codes.InvalidArgument, "missing x-app-id")
+	for _, h := range options.HeadersRequired {
+		if getMetadataValue(md, h) == "" {
+			return ctx, status.Error(codes.InvalidArgument, "missing "+h)
+		}
 	}
-
-	ctx = xcontext.WithIncomingActivity(ctx, a)
-	traceID := a.GetTraceID()
+	traceID := getMetadataValue(md, xhttpheader.LowerKeyTraceID)
 	if traceID == "" {
-		return ctx, status.Error(codes.InvalidArgument, "missing x-trace-id")
+		traceID = base62.NewUUIDString()
 	}
-	logger := xlog.FromContext(ctx).With(slog.String("traceId", traceID))
-	ctx = xlog.NewContext(ctx, logger)
-	logger = logger.With("module", "xgrpc")
-	fields := make([]any, 0, len(md)+1)
-	fields = append(fields, slog.String("method", info.FullMethod))
-
-	for _, mdKey := range metadataKeysForLogging {
-		if mdVal, _ := md[mdKey]; len(mdVal) > 0 && mdVal[0] != "" {
-			fields = append(fields, slog.String(mdKey, mdVal[0]))
+	activity := xcontext.NewActivity(info.FullMethod, md)
+	activity.SetTraceID(traceID)
+	logger := xlog.FromContext(ctx).With(slog.String("trace_id", traceID))
+	ctx = xlog.NewContext(xcontext.WithIncomingActivity(ctx, activity), logger)
+	logger = xlog.FromContext(ctx).With("module", "xgrpc")
+	var logAttrs []any
+	for _, h := range options.HeadersForLogging {
+		if v := getMetadataValue(md, h); v != "" {
+			logAttrs = append(logAttrs, slog.String(h, v))
 		}
 	}
-	logger.InfoContext(ctx, "START", fields...)
+	logger.InfoContext(ctx, "START", logAttrs...)
 
-	if !verifyAPIKey(ctx, md) {
-		attrs := make([]slog.Attr, 0, len(md))
-		for key, val := range md {
-			if len(val) > 0 {
-				attrs = append(attrs, slog.String(key, val[0]))
-			}
-		}
+	if options.APIKeyVerifierFunc != nil && !options.APIKeyVerifierFunc(ctx, md) {
 		logger.ErrorContext(ctx, "invalid api key", slog.Any("metadata", md))
 		return ctx, status.Error(codes.InvalidArgument, "failed to verify api key")
 	}
 
-	auth := authenticate(ctx, md)
-	if auth != nil {
-		if auth.AppID != appID {
-			logger.ErrorContext(ctx, fmt.Sprintf("client appId %s does not match authenticated appId %s", appID, auth.AppID))
-			return ctx, status.Error(codes.Unauthenticated, "client appId does not match authenticated appId")
+	if options.AuthenticatorFunc != nil {
+		auth := options.AuthenticatorFunc(ctx, md)
+		if auth != nil {
+			appID := activity.GetAppID()
+			if auth.AppID != appID {
+				logger.ErrorContext(ctx, fmt.Sprintf("client app_id %s does not match authenticated app_id %s", appID, auth.AppID))
+				return ctx, status.Error(codes.Unauthenticated, "client app_id does not match authenticated app_id")
+			}
+			activity.SetUserID(auth.UserID)
+			logger.InfoContext(ctx, "authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("app_id", auth.AppID))
 		}
-		a.SetUserID(auth.UserID)
-		logger.InfoContext(ctx, "authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("appId", auth.AppID))
 	}
+
 	return ctx, nil
 }
 
-func ServerFinish(ctx context.Context, resp any, err error, logger *slog.Logger, startAt time.Time) (any, error) {
+func PostHandle(ctx context.Context, resp any, err error, logger *slog.Logger, startAt time.Time) (any, error) {
 	if err == nil {
 		logger.InfoContext(ctx, "END", slog.Duration("cost", time.Now().Sub(startAt)))
 		return resp, nil
@@ -103,4 +111,12 @@ func ServerFinish(ctx context.Context, resp any, err error, logger *slog.Logger,
 	}
 	logger.ErrorContext(ctx, "END", xlog.Err(err))
 	return nil, err
+}
+
+func getMetadataValue(md metadata.MD, k string) string {
+	a := md.Get(k)
+	if len(a) == 0 {
+		return ""
+	}
+	return a[0]
 }
