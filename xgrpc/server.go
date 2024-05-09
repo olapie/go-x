@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"runtime/debug"
 	"time"
 
 	"go.olapie.com/security/base62"
@@ -18,35 +19,74 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
-type PreHandleOptions struct {
-	APIKeyVerifierFunc func(ctx context.Context, md metadata.MD) bool
-	AuthenticatorFunc  func(ctx context.Context, md metadata.MD) *xtype.AuthResult
-	HeadersRequired    []string
-	HeadersForLogging  []string
+type ServerInterceptorOptions struct {
+	APIKeyVerifierFunc    func(ctx context.Context, md metadata.MD) bool
+	AuthenticatorFunc     func(ctx context.Context, md metadata.MD) *xtype.AuthResult
+	MetadataValidatorFunc func(ctx context.Context, md metadata.MD) error
+	RequiredMetadataKeys  []string
+	LoggingMetadataKeys   []string
 }
 
-var defaultPreHandleOptions = PreHandleOptions{
-	HeadersForLogging: []string{xhttpheader.LowerKeyClientID, xhttpheader.LowerKeyAppID},
-}
-
-func PreHandle(ctx context.Context, info *grpc.UnaryServerInfo, optFns ...func(options *PreHandleOptions)) (context.Context, error) {
-	options := defaultPreHandleOptions
-	for _, fn := range optFns {
-		fn(&options)
+func NewServerInterceptor(optFns ...func(options *ServerInterceptorOptions)) grpc.UnaryServerInterceptor {
+	options := &ServerInterceptorOptions{
+		LoggingMetadataKeys: []string{xhttpheader.LowerKeyClientID, xhttpheader.LowerKeyAppID},
 	}
+	for _, fn := range optFns {
+		fn(options)
+	}
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+		startAt := time.Now()
+		logger := xlog.FromContext(ctx).With("module", "xgrpc")
+		defer func() {
+			if e := recover(); e != nil {
+				logger.Error("recovered from a panic", slog.Any("panic", e), slog.String("stack", string(debug.Stack())))
+				err = xerror.InternalServerError("")
+			}
+		}()
+		ctx, err = preprocess(ctx, info, options)
+		logger = xlog.FromContext(ctx)
+		if err != nil {
+			logger.ErrorContext(ctx, "failed to preprocess request", xlog.Err(err))
+			return nil, err
+		}
+
+		if logger.Enabled(ctx, slog.LevelDebug) {
+			if msg, ok := req.(proto.Message); ok {
+				logger.Debug("processing request", slog.Any("request", protojson.MarshalOptions{}.Format(msg)))
+			} else {
+				logger.Debug("processing request", slog.Any("request", req))
+			}
+		}
+
+		resp, err = handler(ctx, req)
+		return postprocess(ctx, resp, err, logger, startAt)
+	}
+}
+
+func GetMetadataValue(md metadata.MD, k string) string {
+	a := md.Get(k)
+	if len(a) == 0 {
+		return ""
+	}
+	return a[0]
+}
+
+func preprocess(ctx context.Context, info *grpc.UnaryServerInfo, options *ServerInterceptorOptions) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return ctx, status.Error(codes.InvalidArgument, "failed to read request metadata")
 	}
 
-	for _, h := range options.HeadersRequired {
-		if getMetadataValue(md, h) == "" {
+	for _, h := range options.RequiredMetadataKeys {
+		if GetMetadataValue(md, h) == "" {
 			return ctx, status.Error(codes.InvalidArgument, "missing "+h)
 		}
 	}
-	traceID := getMetadataValue(md, xhttpheader.LowerKeyTraceID)
+	traceID := GetMetadataValue(md, xhttpheader.LowerKeyTraceID)
 	if traceID == "" {
 		traceID = base62.NewUUIDString()
 	}
@@ -54,10 +94,9 @@ func PreHandle(ctx context.Context, info *grpc.UnaryServerInfo, optFns ...func(o
 	activity.SetTraceID(traceID)
 	logger := xlog.FromContext(ctx).With(slog.String("trace_id", traceID))
 	ctx = xlog.NewContext(xcontext.WithIncomingActivity(ctx, activity), logger)
-	logger = xlog.FromContext(ctx).With("module", "xgrpc")
 	var logAttrs []any
-	for _, h := range options.HeadersForLogging {
-		if v := getMetadataValue(md, h); v != "" {
+	for _, h := range options.LoggingMetadataKeys {
+		if v := GetMetadataValue(md, h); v != "" {
 			logAttrs = append(logAttrs, slog.String(h, v))
 		}
 	}
@@ -84,7 +123,7 @@ func PreHandle(ctx context.Context, info *grpc.UnaryServerInfo, optFns ...func(o
 	return ctx, nil
 }
 
-func PostHandle(ctx context.Context, resp any, err error, logger *slog.Logger, startAt time.Time) (any, error) {
+func postprocess(ctx context.Context, resp any, err error, logger *slog.Logger, startAt time.Time) (any, error) {
 	if err == nil {
 		logger.InfoContext(ctx, "END", slog.Duration("cost", time.Now().Sub(startAt)))
 		return resp, nil
@@ -111,12 +150,4 @@ func PostHandle(ctx context.Context, resp any, err error, logger *slog.Logger, s
 	}
 	logger.ErrorContext(ctx, "END", xlog.Err(err))
 	return nil, err
-}
-
-func getMetadataValue(md metadata.MD, k string) string {
-	a := md.Get(k)
-	if len(a) == 0 {
-		return ""
-	}
-	return a[0]
 }
