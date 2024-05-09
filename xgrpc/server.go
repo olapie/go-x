@@ -81,11 +81,6 @@ func preprocess(ctx context.Context, info *grpc.UnaryServerInfo, options *Server
 		return ctx, status.Error(codes.InvalidArgument, "failed to read request metadata")
 	}
 
-	for _, h := range options.RequiredMetadataKeys {
-		if GetMetadataValue(md, h) == "" {
-			return ctx, status.Error(codes.InvalidArgument, "missing "+h)
-		}
-	}
 	traceID := GetMetadataValue(md, xhttpheader.LowerKeyTraceID)
 	if traceID == "" {
 		traceID = base62.NewUUIDString()
@@ -102,9 +97,20 @@ func preprocess(ctx context.Context, info *grpc.UnaryServerInfo, options *Server
 	}
 	logger.InfoContext(ctx, "START", logAttrs...)
 
+	for _, h := range options.RequiredMetadataKeys {
+		if GetMetadataValue(md, h) == "" {
+			return ctx, status.Error(codes.InvalidArgument, "missing "+h)
+		}
+	}
+
+	if options.MetadataValidatorFunc != nil {
+		if err := options.MetadataValidatorFunc(ctx, md); err != nil {
+			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("failed to validate metadata: %v", err))
+		}
+	}
+
 	if options.APIKeyVerifierFunc != nil && !options.APIKeyVerifierFunc(ctx, md) {
-		logger.ErrorContext(ctx, "invalid api key", slog.Any("metadata", md))
-		return ctx, status.Error(codes.InvalidArgument, "failed to verify api key")
+		return ctx, status.Error(codes.InvalidArgument, "missing or invalid api key")
 	}
 
 	if options.AuthenticatorFunc != nil {
