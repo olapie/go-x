@@ -105,7 +105,7 @@ func preprocess(ctx context.Context, info *grpc.UnaryServerInfo, options *Server
 
 	if options.MetadataValidatorFunc != nil {
 		if err := options.MetadataValidatorFunc(ctx, md); err != nil {
-			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("failed to validate metadata: %v", err))
+			return ctx, status.Error(codes.InvalidArgument, fmt.Sprintf("failed to validate metadata: %v", err))
 		}
 	}
 
