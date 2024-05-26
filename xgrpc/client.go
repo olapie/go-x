@@ -3,12 +3,13 @@ package xgrpc
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 
 	"go.olapie.com/x/xbase62"
 	"go.olapie.com/x/xcontext"
+	"go.olapie.com/x/xerror"
 	"go.olapie.com/x/xhttpheader"
 	"go.olapie.com/x/xlog"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -75,5 +76,11 @@ func GetErrorCode(err error) codes.Code {
 	if s, ok := status.FromError(err); ok {
 		return s.Code()
 	}
+
+	var apiErr *xerror.APIError
+	if errors.As(err, &apiErr) {
+		return HTTPStatusToCode(apiErr.Code)
+	}
+
 	return codes.Unknown
 }

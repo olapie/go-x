@@ -4,16 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.olapie.com/x/xreflect"
+	"log/slog"
 	"time"
 
 	"go.olapie.com/x/xcontext"
 	"go.olapie.com/x/xerror"
 	"go.olapie.com/x/xlog"
+	"go.olapie.com/x/xreflect"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 )
+
+type CallFunc[IN proto.Message, OUT proto.Message] func(ctx context.Context, in IN, options ...grpc.CallOption) (OUT, error)
 
 type RetryOptions struct {
 	Count              int
@@ -23,11 +26,11 @@ type RetryOptions struct {
 
 type Retry[IN proto.Message, OUT proto.Message] struct {
 	options  RetryOptions
-	call     func(ctx context.Context, in IN, options ...grpc.CallOption) (OUT, error)
+	call     CallFunc[IN, OUT]
 	callName string
 }
 
-func NewRetry[IN proto.Message, OUT proto.Message](call func(ctx context.Context, in IN, options ...grpc.CallOption) (OUT, error), options ...func(options *RetryOptions)) *Retry[IN, OUT] {
+func NewRetry[IN proto.Message, OUT proto.Message](call CallFunc[IN, OUT], options ...func(options *RetryOptions)) *Retry[IN, OUT] {
 	r := &Retry[IN, OUT]{
 		call:     call,
 		callName: xreflect.FuncNameOf(call),
@@ -61,7 +64,7 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 			return out, fmt.Errorf("failed to call due to context error: %w", err)
 		}
 
-		switch GetErrorCode(err) {
+		switch code := GetErrorCode(err); code {
 		// unrecoverable error codes, return immediately
 		case codes.InvalidArgument,
 			codes.Unimplemented,
@@ -90,7 +93,7 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 					return out, fmt.Errorf("failed to refresh access token due to context error: %w", err)
 				}
 
-				switch GetErrorCode(err) {
+				switch refreshAccessTokenErrorCode := GetErrorCode(err); refreshAccessTokenErrorCode {
 				case codes.InvalidArgument,
 					codes.Unimplemented,
 					codes.PermissionDenied,
@@ -100,8 +103,9 @@ func (r *Retry[IN, OUT]) Call(ctx context.Context, in IN, options ...grpc.CallOp
 					codes.DeadlineExceeded,
 					codes.Unauthenticated:
 					return out, fmt.Errorf("failed to refresh access token: %w", err)
+				default:
+					logger.Error("failed to refresh access token", slog.Int("code", int(refreshAccessTokenErrorCode)), xlog.Err(err))
 				}
-				logger.Error("failed to refresh access token", xlog.Err(err))
 			}
 		default:
 			time.Sleep(r.options.Backoff)
