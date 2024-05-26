@@ -24,9 +24,9 @@ import (
 )
 
 type ServerInterceptorOptions struct {
-	APIKeyVerifierFunc    func(ctx context.Context, md metadata.MD) bool
-	AuthenticatorFunc     func(ctx context.Context, md metadata.MD) *xtype.AuthResult
-	MetadataValidatorFunc func(ctx context.Context, md metadata.MD) error
+	APIKeyVerifierFunc    func(ctx context.Context, md metadata.MD, fullMethod string) bool
+	AuthenticatorFunc     func(ctx context.Context, md metadata.MD, fullMethod string) *xtype.AuthResult
+	MetadataValidatorFunc func(ctx context.Context, md metadata.MD, fullMethod string) error
 	RequiredMetadataKeys  []string
 	LoggingMetadataKeys   []string
 }
@@ -104,17 +104,17 @@ func preprocess(ctx context.Context, info *grpc.UnaryServerInfo, options *Server
 	}
 
 	if options.MetadataValidatorFunc != nil {
-		if err := options.MetadataValidatorFunc(ctx, md); err != nil {
+		if err := options.MetadataValidatorFunc(ctx, md, info.FullMethod); err != nil {
 			return ctx, status.Error(codes.InvalidArgument, fmt.Sprintf("failed to validate metadata: %v", err))
 		}
 	}
 
-	if options.APIKeyVerifierFunc != nil && !options.APIKeyVerifierFunc(ctx, md) {
+	if options.APIKeyVerifierFunc != nil && !options.APIKeyVerifierFunc(ctx, md, info.FullMethod) {
 		return ctx, status.Error(codes.InvalidArgument, "missing or invalid api key")
 	}
 
 	if options.AuthenticatorFunc != nil {
-		auth := options.AuthenticatorFunc(ctx, md)
+		auth := options.AuthenticatorFunc(ctx, md, info.FullMethod)
 		if auth != nil {
 			appID := activity.GetAppID()
 			if auth.AppID != appID {
