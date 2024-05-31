@@ -2,10 +2,11 @@ package xconv
 
 import (
 	"fmt"
-	"go.olapie.com/x/xreflect"
 	"math"
 	"reflect"
 	"strconv"
+
+	"go.olapie.com/x/xreflect"
 )
 
 func ToFloat32(i any) (float32, error) {

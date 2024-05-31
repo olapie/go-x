@@ -5,11 +5,12 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"go.olapie.com/x/xnet"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"go.olapie.com/x/xnet"
 )
 
 func TestNewTLSConfig(t *testing.T) {

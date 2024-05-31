@@ -2,8 +2,9 @@ package xconv
 
 import (
 	"container/list"
-	"go.olapie.com/x/xreflect"
 	"reflect"
+
+	"go.olapie.com/x/xreflect"
 )
 
 // ToList creates list.List

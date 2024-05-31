@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"go.olapie.com/x/xreflect"
 	"log"
 	"reflect"
 	"strings"
+
+	"go.olapie.com/x/xreflect"
 
 	"go.olapie.com/naming"
 )

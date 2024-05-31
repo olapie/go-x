@@ -1,9 +1,10 @@
 package xnet
 
 import (
-	"go.olapie.com/x/xrand"
 	"net"
 	"testing"
+
+	"go.olapie.com/x/xrand"
 )
 
 //

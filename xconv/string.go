@@ -2,10 +2,11 @@ package xconv
 
 import (
 	"fmt"
-	"go.olapie.com/x/xreflect"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"go.olapie.com/x/xreflect"
 )
 
 // ToString converts i to string

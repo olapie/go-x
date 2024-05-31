@@ -2,10 +2,11 @@ package xconv
 
 import (
 	"fmt"
-	"go.olapie.com/x/xreflect"
 	"log"
 	"reflect"
 	"strconv"
+
+	"go.olapie.com/x/xreflect"
 )
 
 // ToBool converts i to bool

@@ -7,13 +7,14 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"go.olapie.com/x/xreflect"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"reflect"
 	"sync"
+
+	"go.olapie.com/x/xreflect"
 
 	"go.olapie.com/x/xbase62"
 

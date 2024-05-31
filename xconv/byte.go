@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.olapie.com/x/xreflect"
 	"reflect"
 	"strconv"
+
+	"go.olapie.com/x/xreflect"
 )
 
 func ToBytes(i any) ([]byte, error) {
