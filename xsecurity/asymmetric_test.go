@@ -10,14 +10,16 @@ import (
 )
 
 func TestEncodePrivateKey(t *testing.T) {
-	pk, err := GeneratePrivateKey()
+	ecdsaKey, err := GeneratePrivateKey(EcdsaP256)
 	xtest.NoError(t, err)
+	pk := ecdsaKey.(*ecdsa.PrivateKey)
 	data, err := EncodePrivateKey(pk, "hello")
 	xtest.NoError(t, err)
 	_, err = DecodePrivateKey(data, "hi")
 	xtest.Error(t, err)
-	pk2, err := DecodePrivateKey(data, "hello")
+	ecdsaKey2, err := DecodePrivateKey(data, "hello")
 	xtest.NoError(t, err)
+	pk2 := ecdsaKey2.(*ecdsa.PrivateKey)
 	digest := []byte(SHA1(time.Now().String()))
 	sign1, err := ecdsa.SignASN1(rand.Reader, pk, digest[:])
 	xtest.NoError(t, err)
@@ -35,8 +37,9 @@ func TestEncodePrivateKey(t *testing.T) {
 }
 
 func TestEncodePublicKey(t *testing.T) {
-	pk, err := GeneratePrivateKey()
+	ecdsaKey, err := GeneratePrivateKey(EcdsaP256)
 	xtest.NoError(t, err)
+	pk := ecdsaKey.(*ecdsa.PrivateKey)
 	data, err := EncodePublicKey(&pk.PublicKey)
 	xtest.NoError(t, err)
 	pub, err := DecodePublicKey(data)
@@ -44,6 +47,6 @@ func TestEncodePublicKey(t *testing.T) {
 	digest := []byte(SHA1(time.Now().String()))
 	sign, err := ecdsa.SignASN1(rand.Reader, pk, digest[:])
 	xtest.NoError(t, err)
-	xtest.True(t, ecdsa.VerifyASN1(pub, digest[:], sign))
+	xtest.True(t, ecdsa.VerifyASN1(pub.(*ecdsa.PublicKey), digest[:], sign))
 	xtest.True(t, pk.PublicKey.Equal(pub))
 }
