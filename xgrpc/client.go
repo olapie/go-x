@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
+	"time"
 
 	"go.olapie.com/x/xbase62"
 	"go.olapie.com/x/xcontext"
@@ -67,6 +69,10 @@ func signClientContext(ctx context.Context, createAPIKey func(md metadata.MD)) c
 			xlog.FromContext(ctx).InfoContext(ctx, "xgrpc.signClientContext: generated trace id "+traceID)
 		}
 		xhttpheader.SetTraceID(md, traceID)
+	}
+	if timestamp := xhttpheader.Get(md, xhttpheader.LowerKeyTimestamp); timestamp == "" {
+		timestamp = fmt.Sprint(time.Now().Unix())
+		xhttpheader.Set(md, xhttpheader.LowerKeyTimestamp, timestamp)
 	}
 	createAPIKey(md)
 	return metadata.NewOutgoingContext(ctx, md)
