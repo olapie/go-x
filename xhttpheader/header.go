@@ -45,6 +45,7 @@ const (
 	KeyTraceID   = "X-Trace-Id"
 	KeyAPIKey    = "X-Api-Key"
 	KeyServiceID = "X-Service-Id"
+	KeyTimestamp = "X-Timestamp"
 )
 
 const (
@@ -73,6 +74,7 @@ const (
 	LowerKeyTraceID   = "x-trace-id"
 	LowerKeyAPIKey    = "x-api-key"
 	LowerKeyServiceID = "x-service-id"
+	LowerKeyTimestamp = "x-timestamp"
 )
 
 const (
