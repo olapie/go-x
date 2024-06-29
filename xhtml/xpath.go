@@ -72,7 +72,6 @@ func FindByXPath(root *html.Node, path string, filter func(node *html.Node) bool
 	for i, xpathNode := range xpathNodes {
 		for j := 0; j < xpathNode.Position && current != nil; current = current.NextSibling {
 			if filter != nil && !filter(current) {
-				current = current.NextSibling
 				continue
 			}
 
