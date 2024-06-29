@@ -8,6 +8,7 @@ use (
 	./xconv
 	./xerror
 	./xgrpc
+	./xhtml
 	./xhttp
 	./xhttpheader
 	./xjwt
