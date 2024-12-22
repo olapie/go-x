@@ -17,13 +17,16 @@ type ConnStringBuilder struct {
 	password            string
 	db                  string
 	schema              string
-	secure              bool
+	sslMode             string
+
+	query url.Values
 }
 
 func NewConnStringBuilder() *ConnStringBuilder {
 	return &ConnStringBuilder{
-		host: "localhost",
-		port: 5432,
+		host:  "localhost",
+		port:  5432,
+		query: map[string][]string{},
 	}
 }
 
@@ -62,8 +65,14 @@ func (b *ConnStringBuilder) Schema(schema string) *ConnStringBuilder {
 	return b
 }
 
-func (b *ConnStringBuilder) Secure(secure bool) *ConnStringBuilder {
-	b.secure = secure
+// SSLMode set sslmode, e.g. disabled, verify-ca
+func (b *ConnStringBuilder) SSLMode(mode string) *ConnStringBuilder {
+	b.sslMode = mode
+	return b
+}
+
+func (b *ConnStringBuilder) WithQuery(key, value string) *ConnStringBuilder {
+	b.query.Set(key, value)
 	return b
 }
 
@@ -124,17 +133,16 @@ func (b *ConnStringBuilder) Build() string {
 			connStr = "postgres://" + b.user + ":" + b.password + "@" + connStr
 		}
 	}
-	query := url.Values{}
-	if !b.secure {
-		query.Add("sslmode", "disable")
+	if b.sslMode != "" {
+		b.query.Set("sslmode", b.sslMode)
 	}
 	if b.schema != "" {
-		query.Add("search_path", b.schema)
+		b.query.Set("search_path", b.schema)
 	}
-	if len(query) == 0 {
+	if len(b.query) == 0 {
 		return connStr
 	}
-	return connStr + "?" + query.Encode()
+	return connStr + "?" + b.query.Encode()
 }
 
 func SetParameterInConnString(s string, name, val string) string {
