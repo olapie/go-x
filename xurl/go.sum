@@ -1,0 +1,6 @@
+go.olapie.com/x/xconv v0.1.0 h1:J/ErCaduc9tKjt6gtVTJunqS+z09lUr1OlRsZMVxF8M=
+go.olapie.com/x/xconv v0.1.0/go.mod h1:avwhhaun2k5XCXrrN47+3bBHmIC1eEf/uhRsHSFrM94=
+go.olapie.com/x/xconv v0.1.4 h1:U1kI2jCIw5/+Vju/tczazJDZqsQwf45vKRnjmXagF/8=
+go.olapie.com/x/xconv v0.1.4/go.mod h1:Ie8BkWhBM/swD8UU9tJspV9rz96q5YOCoE0/l/BmivM=
+go.olapie.com/x/xreflect v0.1.0 h1:Vls4UpQuj6AVbTW3BqRWBAzvH3Cj3fxsz+q9IxxipVY=
+go.olapie.com/x/xreflect v0.1.0/go.mod h1:UspKpQ99/UWVEqbfmyT1syN+DzuKpTJjHVtMv+y2HhA=
