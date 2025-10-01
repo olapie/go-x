@@ -1,6 +1,6 @@
 module go.olapie.com/x/xgrpc
 
-go 1.22.0
+go 1.24.0
 
 require (
 	go.olapie.com/security v0.2.2
@@ -11,8 +11,8 @@ require (
 	go.olapie.com/x/xlog v0.1.2
 	go.olapie.com/x/xreflect v0.1.0
 	go.olapie.com/x/xtype v0.3.1
-	google.golang.org/grpc v1.64.0
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/grpc v1.75.1
+	google.golang.org/protobuf v1.36.9
 )
 
 require (
@@ -20,8 +20,8 @@ require (
 	go.olapie.com/naming v0.3.0 // indirect
 	go.olapie.com/x/xconv v0.1.4 // indirect
 	go.olapie.com/x/xsession v0.1.1 // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
+	golang.org/x/net v0.44.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250929231259-57b25ae835d4 // indirect
 )
