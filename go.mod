@@ -1,6 +1,6 @@
 module go.olapie.com/x
 
-go 1.25.1
+go 1.20.0
 
 require (
 	github.com/google/uuid v1.6.0
