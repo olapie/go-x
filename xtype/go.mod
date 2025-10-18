@@ -4,8 +4,8 @@ go 1.22.0
 
 require (
 	go.olapie.com/naming v0.3.0
-	go.olapie.com/x/xconv v0.1.4
-	go.olapie.com/x/xtest v0.1.0
+	go.olapie.com/x/xconv v0.2.0
+	go.olapie.com/x/xtest v0.2.0
 )
 
 require (
