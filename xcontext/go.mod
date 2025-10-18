@@ -6,7 +6,7 @@ require (
 	go.olapie.com/x/xerror v0.2.0
 	go.olapie.com/x/xhttpheader v0.2.0
 	go.olapie.com/x/xsession v0.1.1
-	go.olapie.com/x/xtype v0.3.1
+	go.olapie.com/x/xtype v0.4.0
 )
 
 require (
