@@ -3,7 +3,6 @@ module go.olapie.com/x/xgrpc
 go 1.24.0
 
 require (
-	go.olapie.com/security v0.2.2
 	go.olapie.com/x v0.1.2
 	google.golang.org/grpc v1.75.1
 	google.golang.org/protobuf v1.36.9

@@ -9,7 +9,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"go.olapie.com/security/base62"
+	"go.olapie.com/x/xbase62"
 	"go.olapie.com/x/xcontext"
 	"go.olapie.com/x/xerror"
 	"go.olapie.com/x/xhttpheader"
@@ -83,7 +83,7 @@ func preprocess(ctx context.Context, info *grpc.UnaryServerInfo, options *Server
 
 	traceID := GetMetadataValue(md, xhttpheader.LowerKeyTraceID)
 	if traceID == "" {
-		traceID = base62.NewUUIDString()
+		traceID = xbase62.NewUUIDString()
 	}
 	activity := xcontext.NewActivity(info.FullMethod, md)
 	activity.SetTraceID(traceID)
