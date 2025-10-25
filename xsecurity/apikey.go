@@ -8,6 +8,8 @@ import (
 	"fmt"
 )
 
+// GenerateAPIKey generates API key for each request
+// privateKey is pre-configured in each officially built client package
 func GenerateAPIKey(privateKey *ecdsa.PrivateKey, traceID string, timestamp int64) (string, error) {
 	digest := generateRequestDigest(traceID, timestamp)
 	signedDigest, err := ecdsa.SignASN1(rand.Reader, privateKey, digest)
