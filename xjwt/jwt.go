@@ -6,6 +6,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"go.olapie.com/x/xerror"
+	"go.olapie.com/x/xhttpheader"
+	"go.olapie.com/x/xtype"
 )
 
 func Sign(privateKey *ecdsa.PrivateKey, appID, userID string, expiresAt time.Time) (string, error) {
@@ -33,4 +36,21 @@ func Parse(publicKey *ecdsa.PublicKey, tokenString string) (appID, userID string
 		return claims.Issuer, claims.Subject, nil
 	}
 	return "", "", fmt.Errorf("invalid token: %s", tokenString)
+}
+
+func VerifyAuthorization[T ~map[string][]string | ~map[string]string](pubKey *ecdsa.PublicKey, h T) (*xtype.AuthResult, error) {
+	accessToken := xhttpheader.GetBearer(h)
+	if accessToken == "" {
+		return nil, xerror.Unauthorized("missing bearer access token")
+	}
+
+	appID, uid, err := Parse(pubKey, accessToken)
+	if err != nil {
+		return nil, xerror.Unauthorized("failed to parse access token: %s", err)
+	}
+
+	return &xtype.AuthResult{
+		AppID:  appID,
+		UserID: xtype.NewUserID(uid),
+	}, nil
 }

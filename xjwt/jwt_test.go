@@ -7,9 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"go.olapie.com/x/xtest"
-
 	"github.com/google/uuid"
+	"go.olapie.com/x/xtest"
 )
 
 func TestValidToken(t *testing.T) {
