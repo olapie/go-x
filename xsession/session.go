@@ -23,7 +23,7 @@ const (
 type Session struct {
 	id      string
 	storage Storage
-	userID  xtype.UserIDInterface
+	userID  xtype.UserID
 }
 
 func NewSession(id string, storage Storage) *Session {
@@ -42,11 +42,11 @@ func (s *Session) ID() string {
 	return s.id
 }
 
-func (s *Session) UserID() xtype.UserIDInterface {
+func (s *Session) UserID() xtype.UserID {
 	return s.userID
 }
 
-func (s *Session) SetUserID(ctx context.Context, userID xtype.UserIDInterface) error {
+func (s *Session) SetUserID(ctx context.Context, userID xtype.UserID) error {
 	if userID == nil {
 		s.userID = nil
 		return s.storage.Set(ctx, s.id, keyUserID, "")

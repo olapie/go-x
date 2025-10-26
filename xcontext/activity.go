@@ -28,7 +28,7 @@ type Activity struct {
 
 	//Session is only available in incoming context, may be nil if session is not enabled
 	session *xsession.Session
-	userID  xtype.UserIDInterface
+	userID  xtype.UserID
 }
 
 var (
@@ -65,11 +65,11 @@ func (a *Activity) Session() *xsession.Session {
 	return a.session
 }
 
-func (a *Activity) UserID() xtype.UserIDInterface {
+func (a *Activity) UserID() xtype.UserID {
 	return a.userID
 }
 
-func (a *Activity) SetUserID(id xtype.UserIDInterface) {
+func (a *Activity) SetUserID(id xtype.UserID) {
 	a.userID = id
 }
 
