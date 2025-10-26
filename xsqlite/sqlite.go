@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	_ "github.com/glebarez/go-sqlite"
 )
 
 func Open(fileName string) (*sql.DB, error) {
@@ -25,7 +27,7 @@ func Open(fileName string) (*sql.DB, error) {
 	}
 
 	dataSource := fmt.Sprintf("file:%s?cache=shared", fileName)
-	return sql.Open("sqlite3", dataSource)
+	return sql.Open("sqlite", dataSource)
 }
 
 func MustOpen(filename string) *sql.DB {

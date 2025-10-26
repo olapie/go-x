@@ -8,14 +8,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	_ "github.com/mattn/go-sqlite3"
 	"go.olapie.com/x/xtest"
 )
 
 func createTable[K SimpleKey, R any](t *testing.T, pkFn func(R) K) *SimpleTable[K, R] {
 	t.Log("createTable")
 
-	db, err := sql.Open("sqlite3", "file::memory:")
+	db, err := sql.Open("sqlite", "file::memory:")
 	if err != nil {
 		t.Fatal(err)
 	}

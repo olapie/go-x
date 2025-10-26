@@ -9,9 +9,8 @@ import (
 	"reflect"
 	"strings"
 
-	"go.olapie.com/x/xreflect"
-
 	"go.olapie.com/naming"
+	"go.olapie.com/x/xreflect"
 )
 
 type tableNamer interface {
@@ -183,7 +182,7 @@ func (t *Table) Save(record any) error {
 	switch t.driverName {
 	case "mysql":
 		return t.mysqlSave(record)
-	case "sqlite3":
+	case "sqlite", "sqlite3":
 		return t.sqliteSave(record)
 	default:
 		panic("Save operation is not supported for driver: " + t.driverName)
