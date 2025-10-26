@@ -69,10 +69,8 @@ func (s *Session) SetUserID(ctx context.Context, userID xtype.UserID) error {
 
 	if i, ok := userID.Int(); ok {
 		return s.SetInt64(ctx, keyUserID, i)
-	} else if str, ok := userID.String(); ok {
-		return s.SetString(ctx, keyUserID, str)
 	} else {
-		return fmt.Errorf("unsupported userID type")
+		return s.SetString(ctx, keyUserID, userID.String())
 	}
 }
 
