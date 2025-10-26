@@ -41,7 +41,11 @@ func Parse(publicKey *ecdsa.PublicKey, tokenString string) (appID, userID string
 func VerifyAuthorization[T ~map[string][]string | ~map[string]string](pubKey *ecdsa.PublicKey, h T) (*xtype.AuthResult, error) {
 	accessToken := xhttpheader.GetBearer(h)
 	if accessToken == "" {
-		return nil, xerror.Unauthorized("missing bearer access token")
+		accessToken = xhttpheader.GetAuthorization(h)
+	}
+
+	if accessToken == "" {
+		return nil, xerror.Unauthorized("missing access token")
 	}
 
 	appID, uid, err := Parse(pubKey, accessToken)
