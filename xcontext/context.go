@@ -39,6 +39,7 @@ func SetIncomingUserID[T xtype.UserIDTypes](ctx context.Context, id T) error {
 
 func GetIncomingUserID[T xtype.UserIDTypes](ctx context.Context) T {
 	var id T
+	val := reflect.ValueOf(&id).Elem()
 	a := GetIncomingActivity(ctx)
 	if a == nil {
 		return id
@@ -48,17 +49,15 @@ func GetIncomingUserID[T xtype.UserIDTypes](ctx context.Context) T {
 		return id
 	}
 
-	v := a.userID.Value()
-	if id, ok := v.(T); ok {
-		return id
+	if val.Kind() == reflect.Int64 {
+		intVal, ok := a.userID.Int()
+		if ok {
+			val.SetInt(intVal)
+		}
+	} else {
+		str := a.UserID().String()
+		val.SetString(str)
 	}
-
-	t := reflect.TypeOf(v)
-	idType := reflect.TypeOf(id)
-	if t.ConvertibleTo(reflect.TypeOf(id)) {
-		id, _ = reflect.ValueOf(v).Convert(idType).Interface().(T)
-	}
-
 	return id
 }
 
