@@ -23,5 +23,9 @@ func SignRequest(req *http.Request, createAPIKey func(h http.Header)) {
 		}
 		xhttpheader.SetTraceID(req.Header, traceID)
 	}
+
+	if createAPIKey == nil {
+		createAPIKey = xhttpheader.Sign[http.Header]
+	}
 	createAPIKey(req.Header)
 }
