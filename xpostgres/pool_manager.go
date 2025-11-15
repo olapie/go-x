@@ -13,14 +13,14 @@ import (
 
 type PoolManager struct {
 	mu         sync.Mutex
-	m          xsync.Map[string, DBTX]
+	m          xsync.Map[string, *pgxpool.Pool]
 	connString string
 	config     *Config
 }
 
 func NewPoolManager(ctx context.Context, connString string, config *Config) *PoolManager {
 	m := &PoolManager{
-		m:          xsync.Map[string, DBTX]{},
+		m:          xsync.Map[string, *pgxpool.Pool]{},
 		connString: connString,
 		config:     config,
 	}
