@@ -6,16 +6,10 @@ import (
 	"sync"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.olapie.com/x/xlog"
 	"go.olapie.com/x/xsync"
 )
-
-type DBTX interface {
-	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
-	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
-	QueryRow(context.Context, string, ...interface{}) pgx.Row
-}
 
 type PoolManager struct {
 	mu         sync.Mutex
@@ -41,7 +35,7 @@ func NewPoolManager(ctx context.Context, connString string, config *Config) *Poo
 	return m
 }
 
-func (m *PoolManager) Get(ctx context.Context, schema string) (DBTX, error) {
+func (m *PoolManager) Get(ctx context.Context, schema string) (*pgxpool.Pool, error) {
 	// TODO: search_path param not working after migration from self-hosted Postgres to supabase
 	// so we set search_path explicitly
 	connString := SetParameterInConnString(m.connString, "search_path", schema)
