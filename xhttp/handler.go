@@ -53,9 +53,9 @@ type Authenticator[T xtype.UserIDTypes] interface {
 }
 
 func NewStartHandler(
-	maybeNext http.Handler,
 	verifyAPIKey func(ctx context.Context, header http.Header) bool,
-	authenticate func(ctx context.Context, header http.Header) *xtype.AuthResult) http.Handler {
+	authenticate func(ctx context.Context, header http.Header) *xtype.AuthResult,
+	nextHandlers ...http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		startAt := time.Now()
 		a := xcontext.NewActivity("", req.Header)
@@ -124,7 +124,14 @@ func NewStartHandler(
 					logger.InfoContext(ctx, "authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("appId", auth.AppID))
 				}
 			}
-			maybeNext.ServeHTTP(w, req)
+
+			for _, f := range nextHandlers {
+				f.ServeHTTP(w, req)
+				if w.Status() != 0 {
+					return
+				}
+			}
+
 		} else {
 			Error(w, xerror.NewAPIError(http.StatusBadRequest, "invalid api key"))
 			return
