@@ -113,28 +113,33 @@ func NewStartHandler(
 			return
 		}
 
-		if verifyAPIKey(ctx, req.Header) {
+		if verifyAPIKey != nil {
+			verified := verifyAPIKey(ctx, req.Header)
+			if !verified {
+				Error(w, xerror.NewAPIError(http.StatusBadRequest, "invalid api key"))
+				return
+			}
+		}
+
+		if authenticate != nil {
 			auth := authenticate(ctx, req.Header)
 			if auth != nil {
 				if auth.AppID != appID {
-					Error(w, xerror.NewAPIError(http.StatusUnauthorized, "client appId does not match authenticated appId"))
-					return
+					logger.WarnContext(ctx, "invalid app id", slog.String("appId", appID))
 				} else {
 					a.SetUserID(auth.UserID)
-					logger.InfoContext(ctx, "authenticated", slog.Any("uid", auth.UserID.Value()), slog.String("appId", auth.AppID))
+					logger.InfoContext(ctx, "authenticated",
+						slog.Any("uid", auth.UserID.Value()),
+						slog.String("appId", appID))
 				}
 			}
+		}
 
-			for _, f := range nextHandlers {
-				f.ServeHTTP(w, req)
-				if w.Status() != 0 {
-					return
-				}
+		for _, f := range nextHandlers {
+			f.ServeHTTP(w, req)
+			if w.Status() != 0 {
+				return
 			}
-
-		} else {
-			Error(w, xerror.NewAPIError(http.StatusBadRequest, "invalid api key"))
-			return
 		}
 	})
 }
