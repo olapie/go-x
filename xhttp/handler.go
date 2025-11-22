@@ -138,3 +138,30 @@ func NewStartHandler(
 		}
 	})
 }
+
+func NewConsumerHandler[T any](f func(ctx context.Context, t T) error) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params T
+		if ReadJSONBody(w, r, &params) {
+			err := f(r.Context(), params)
+			Error(w, err)
+		}
+	})
+}
+
+func NewSupplierHandler[T any](f func(ctx context.Context) (T, error)) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		res, err := f(r.Context())
+		JSONOrError(w, res, err)
+	})
+}
+
+func NewFunctionHandler[T, R any](f func(ctx context.Context, t T) (R, error)) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params T
+		if ReadJSONBody(w, r, &params) {
+			res, err := f(r.Context(), params)
+			JSONOrError(w, res, err)
+		}
+	})
+}
