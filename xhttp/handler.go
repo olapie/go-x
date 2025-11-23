@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"go.olapie.com/x/xbase62"
@@ -92,6 +93,7 @@ func NewStartHandler(
 		defer func() {
 			if p := recover(); p != nil {
 				logger.ErrorContext(ctx, "panic", "error", p)
+				debug.PrintStack()
 				rw.WriteHeader(http.StatusInternalServerError)
 				return
 			}
