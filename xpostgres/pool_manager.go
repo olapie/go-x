@@ -32,6 +32,11 @@ func (m *PoolManager) Get(ctx context.Context, schema string) (*pgxpool.Pool, er
 	connString := SetParameterInConnString(m.connString, "search_path", schema)
 	m.mu.Lock()
 	defer m.mu.Unlock()
+
+	if pool, ok := m.m.Load(schema); ok {
+		return pool, nil
+	}
+
 	pool, err := NewPool(ctx, connString, m.config)
 	if err != nil {
 		return nil, fmt.Errorf("new pool: %w", err)
