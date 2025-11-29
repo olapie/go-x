@@ -3,6 +3,7 @@ package xsecurity
 import (
 	"bytes"
 	"fmt"
+	"go.olapie.com/x/xbase62"
 	"io"
 	"os"
 )
@@ -224,4 +225,25 @@ func ReEncryptFile(src SourceFile, dst DestFile, srcPassword, dstPassword string
 	ew := NewEncryptedWriter(df, dstPassword)
 	_, err = io.Copy(ew, dr)
 	return err
+}
+
+func EncryptText(text, password string) (string, error) {
+	encrypted, err := Encrypt([]byte(text), password)
+	if err != nil {
+		return "", err
+	}
+	return xbase62.EncodeToString(encrypted), nil
+}
+
+func DecryptText(text, password string) (string, error) {
+	data, err := xbase62.DecodeString(text)
+	if err != nil {
+		return "", err
+	}
+
+	b, err := Decrypt(data, password)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }
