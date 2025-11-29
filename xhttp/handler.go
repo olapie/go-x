@@ -56,7 +56,7 @@ type Authenticator[T xtype.UserIDTypes] interface {
 func NewStartHandler(
 	verifyAPIKey func(ctx context.Context, header http.Header) bool,
 	authenticate func(ctx context.Context, header http.Header) *xtype.AuthResult,
-	nextHandlers ...http.Handler) http.Handler {
+	nextHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		startAt := time.Now()
 		a := xcontext.NewActivity("", req.Header)
@@ -109,12 +109,6 @@ func NewStartHandler(
 			}
 		}()
 
-		appID := a.GetAppID()
-		if appID == "" {
-			Error(w, xerror.NewAPIError(http.StatusBadRequest, "client appId does not match authenticated appId"))
-			return
-		}
-
 		if verifyAPIKey != nil {
 			verified := verifyAPIKey(ctx, req.Header)
 			if !verified {
@@ -126,23 +120,18 @@ func NewStartHandler(
 		if authenticate != nil {
 			auth := authenticate(ctx, req.Header)
 			if auth != nil {
-				if auth.AppID != appID {
-					logger.WarnContext(ctx, "invalid app id", slog.String("appId", appID))
+				if auth.AppID != a.GetAppID() {
+					logger.WarnContext(ctx, "invalid app id", slog.String("appId", a.GetAppID()))
 				} else {
 					a.SetUserID(auth.UserID)
 					logger.InfoContext(ctx, "authenticated",
 						slog.Any("uid", auth.UserID.Value()),
-						slog.String("appId", appID))
+						slog.String("appId", a.GetAppID()))
 				}
 			}
 		}
 
-		for _, f := range nextHandlers {
-			f.ServeHTTP(w, req)
-			if w.Status() != 0 {
-				return
-			}
-		}
+		nextHandler.ServeHTTP(w, req)
 	})
 }
 
