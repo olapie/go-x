@@ -1,19 +1,23 @@
 package xapp
 
 import (
-	"flag"
 	"fmt"
 	"log/slog"
 
 	"go.olapie.com/x/xlog"
 )
 
-func Initialize(appName string, httpServerAddr, grpcServerAddr *string) {
-	logFilename := flag.String("logfile", "", "log filename")
-	flag.Parse()
-	CheckVersionArgument(appName)
+type Config struct {
+	AppName        string
+	LogFilename    string
+	HTTPServerAddr string
+	GRPCServerAddr string
+}
+
+func Initialize(cfg *Config) {
+	CheckVersionArgument(cfg.AppName)
 	closer := xlog.Init(func(options *xlog.Options) {
-		options.Filename = *logFilename
+		options.Filename = cfg.LogFilename
 	})
 
 	CleanUp(func() {
@@ -23,23 +27,23 @@ func Initialize(appName string, httpServerAddr, grpcServerAddr *string) {
 	})
 
 	go func() {
-		if httpServerAddr != nil && *httpServerAddr != "" {
-			slog.Info(fmt.Sprintf("http server is running on %v", *httpServerAddr))
+		if cfg.HTTPServerAddr != "" {
+			slog.Info(fmt.Sprintf("http server is running on %v", cfg.HTTPServerAddr))
 		}
 
-		if grpcServerAddr != nil && *grpcServerAddr != "" {
-			slog.Info(fmt.Sprintf("grpc server is running on %v", *grpcServerAddr))
+		if cfg.GRPCServerAddr != "" {
+			slog.Info(fmt.Sprintf("grpc server is running on %v", cfg.GRPCServerAddr))
 		}
 
 		if closer != nil {
-			fmt.Printf("log file: %s\n", *logFilename)
+			fmt.Printf("log file: %s\n", cfg.LogFilename)
 
-			if httpServerAddr != nil && *httpServerAddr != "" {
-				fmt.Printf("http server is running on %v\n", *httpServerAddr)
+			if cfg.HTTPServerAddr != "" {
+				fmt.Printf("http server is running on %v\n", cfg.HTTPServerAddr)
 			}
 
-			if grpcServerAddr != nil && *grpcServerAddr != "" {
-				fmt.Printf("grpc server is running on %v\n", *grpcServerAddr)
+			if cfg.GRPCServerAddr != "" {
+				fmt.Printf("grpc server is running on %v\n", cfg.GRPCServerAddr)
 			}
 		}
 	}()
