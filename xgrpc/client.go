@@ -71,7 +71,7 @@ func signClientContext(ctx context.Context, createAPIKey func(md metadata.MD)) c
 		xhttpheader.SetTraceID(md, traceID)
 	}
 	if timestamp := xhttpheader.Get(md, xhttpheader.LowerKeyTimestamp); timestamp == "" {
-		timestamp = fmt.Sprint(time.Now().Unix())
+		timestamp = fmt.Sprint(time.Now().UnixMilli())
 		xhttpheader.Set(md, xhttpheader.LowerKeyTimestamp, timestamp)
 	}
 	createAPIKey(md)

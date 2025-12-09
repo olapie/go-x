@@ -30,7 +30,7 @@ func Sign[T ~map[string][]string](h T) {
 	}
 	timestamp := Get(h, KeyTimestamp)
 	if timestamp == "" {
-		timestamp = fmt.Sprint(getCurrentTime().Unix())
+		timestamp = fmt.Sprint(getCurrentTime().UnixMilli())
 		Set(h, KeyTimestamp, timestamp)
 	}
 	t, err := strconv.ParseInt(timestamp, 10, 64)
