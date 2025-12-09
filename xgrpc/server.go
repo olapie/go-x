@@ -131,7 +131,7 @@ func preprocess(ctx context.Context, info *grpc.UnaryServerInfo, options *Server
 
 func postprocess(ctx context.Context, resp any, err error, logger *slog.Logger, startAt time.Time) (any, error) {
 	if err == nil {
-		logger.InfoContext(ctx, "END", slog.Duration("cost", time.Now().Sub(startAt)))
+		logger.InfoContext(ctx, "END", slog.Int64("cost", time.Now().Sub(startAt).Milliseconds()))
 		return resp, nil
 	}
 

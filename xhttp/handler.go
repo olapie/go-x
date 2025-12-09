@@ -100,7 +100,7 @@ func NewStartHandler(
 
 			status := w.Status()
 			fields = []any{slog.Int("status", status),
-				slog.Duration("cost", time.Now().Sub(startAt))}
+				slog.Int64("cost", time.Now().Sub(startAt).Milliseconds())}
 			if status >= 400 {
 				fields = append(fields, slog.String("body", string(w.Body())))
 				logger.ErrorContext(ctx, "END", fields...)
