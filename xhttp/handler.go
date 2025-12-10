@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+	"strconv"
 	"time"
 
 	"go.olapie.com/x/xbase62"
@@ -76,6 +77,11 @@ func NewStartHandler(
 			slog.String("remoteAddr", req.RemoteAddr))
 		for key := range req.Header {
 			fields = append(fields, slog.String(key, req.Header.Get(key)))
+			if key == xhttpheader.KeyTimestamp {
+				if clientTimestampMs, err := strconv.ParseInt(req.Header.Get(key), 10, 64); err == nil {
+					fields = append(fields, slog.Int64("client-latency", time.Now().UnixMilli()-clientTimestampMs))
+				}
+			}
 		}
 
 		ctx = xlog.NewContext(ctx, logger)

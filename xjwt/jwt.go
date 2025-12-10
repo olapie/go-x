@@ -11,6 +11,10 @@ import (
 	"go.olapie.com/x/xtype"
 )
 
+const (
+	ErrNoAuthorization = xerror.String("no authorization token")
+)
+
 func Sign(privateKey *ecdsa.PrivateKey, appID, userID string, expiresAt time.Time) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Issuer:    appID,
@@ -45,7 +49,7 @@ func VerifyAuthorization[T ~map[string][]string | ~map[string]string](pubKey *ec
 	}
 
 	if accessToken == "" {
-		return nil, xerror.Unauthorized("missing access token")
+		return nil, ErrNoAuthorization
 	}
 
 	appID, uid, err := Parse(pubKey, accessToken)
