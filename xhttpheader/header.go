@@ -209,11 +209,11 @@ func GetAuthorization[H HeaderTypes](h H) string {
 }
 
 func SetAuthorization[H HeaderTypes](h H, contentType string) {
-	Set(h, KeyContentType, contentType)
+	Set(h, KeyAuthorization, contentType)
 }
 
 func SetAuthorizationNX[H HeaderTypes](h H, contentType string) {
-	SetNX(h, KeyContentType, contentType)
+	SetNX(h, KeyAuthorization, contentType)
 }
 
 func GetBasicAccount[H HeaderTypes](h H) (user string, password string) {
