@@ -76,6 +76,9 @@ func NewStartHandler(
 			slog.String("host", req.Host),
 			slog.String("remoteAddr", req.RemoteAddr))
 		for key := range req.Header {
+			if key == xhttpheader.KeyAuthorization || key == xhttpheader.KeyAPIKey {
+				continue
+			}
 			fields = append(fields, slog.String(key, req.Header.Get(key)))
 			if key == xhttpheader.KeyTimestamp {
 				if clientTimestampMs, err := strconv.ParseInt(req.Header.Get(key), 10, 64); err == nil {
