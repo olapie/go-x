@@ -1,7 +1,9 @@
 package xhttp
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"log/slog"
@@ -25,6 +27,12 @@ func Error(w http.ResponseWriter, err error) {
 		return
 	}
 
+	if errors.Is(err, xerror.DBNoRecords) || errors.Is(err, sql.ErrNoRows) {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
 	status := http.StatusInternalServerError
 	if s := xerror.GetCode(err); s != 0 {
 		status = s
@@ -36,10 +44,7 @@ func Error(w http.ResponseWriter, err error) {
 	}
 
 	w.WriteHeader(status)
-	_, err = w.Write([]byte(err.Error()))
-	if err != nil {
-		log.Println(err)
-	}
+	_, _ = w.Write([]byte(err.Error()))
 }
 
 func JSON(w http.ResponseWriter, v any) {
