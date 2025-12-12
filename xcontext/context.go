@@ -67,7 +67,6 @@ func SetSystemUser(ctx context.Context) {
 	a := GetIncomingActivity(ctx)
 	if a == nil {
 		panic("no incoming activity")
-		return
 	}
 	a.userID = systemUserID
 }

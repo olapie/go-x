@@ -121,7 +121,7 @@ func NewStartHandler(
 		if verifyAPIKey != nil {
 			verified := verifyAPIKey(ctx, req.Header)
 			if !verified {
-				Error(w, xerror.NewAPIError(http.StatusBadRequest, "invalid api key"))
+				Error(w, xerror.NewAPIErrorf(http.StatusBadRequest, "invalid api key"))
 				return
 			}
 		}

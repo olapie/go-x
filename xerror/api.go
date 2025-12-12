@@ -40,7 +40,14 @@ func (e *APIError) Is(target error) bool {
 	return false
 }
 
-func NewAPIError(code int, format string, a ...any) *APIError {
+func NewAPIError(code int, msg string) *APIError {
+	return &APIError{
+		Code:    code,
+		Message: msg,
+	}
+}
+
+func NewAPIErrorf(code int, format string, a ...any) *APIError {
 	msg := fmt.Sprintf(format, a...)
 	if msg == "" {
 		msg = http.StatusText(code)
