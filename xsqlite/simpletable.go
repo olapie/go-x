@@ -9,6 +9,7 @@ import (
 
 	"go.olapie.com/x/xsecurity"
 	"go.olapie.com/x/xsql"
+	"go.olapie.com/x/xtime"
 )
 
 type SimpleTableOptions[K SimpleKey, R any] struct {
