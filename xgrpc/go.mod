@@ -3,7 +3,7 @@ module go.olapie.com/x/xgrpc
 go 1.24.0
 
 require (
-	go.olapie.com/x v0.5.0
+	go.olapie.com/x v0.5.1
 	google.golang.org/grpc v1.77.0
 	google.golang.org/protobuf v1.36.11
 )

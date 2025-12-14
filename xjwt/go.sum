@@ -4,3 +4,7 @@ github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 go.olapie.com/x v0.5.0 h1:Y0tqsmtctBleclpsDOOZjfwgq84iaRZhOQ0GN7zrumQ=
 go.olapie.com/x v0.5.0/go.mod h1:dJp68rBqq7vn24ngJuZVs+9+nA+i201qKL6HJJhrA+I=
+go.olapie.com/x v0.5.1 h1:i2stfEhHJ4fI0Du8AbvjZg6c8hZwcjT8Ne0uCo6YQyU=
+go.olapie.com/x v0.5.1/go.mod h1:K0XVt7mc8cfAbGIsYBAFJHLBrWuNzGDl1YqKH9ehVUc=
+golang.org/x/text v0.32.0 h1:ZD01bjUt1FQ9WJ0ClOL5vxgxOI/sVCNgX1YtKwcY0mU=
+golang.org/x/text v0.32.0/go.mod h1:o/rUWzghvpD5TXrTIBuJU77MTaN0ljMWE47kxGJQ7jY=
