@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"go.olapie.com/times"
 	"go.olapie.com/x/xconv"
+	"go.olapie.com/x/xtime"
 )
 
 type Uptimer interface {
@@ -30,7 +30,7 @@ func GetDeviceID(m SecretManager) string {
 }
 
 func SetTimeZone(name string, offset int) {
-	time.Local = times.ToLocation(name, offset)
+	time.Local = xtime.ToLocation(name, offset)
 }
 
 func GetTimeZoneOffset() int {

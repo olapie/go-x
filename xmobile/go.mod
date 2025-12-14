@@ -6,9 +6,8 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.12
 	github.com/google/uuid v1.6.0
 	github.com/mattn/go-sqlite3 v1.14.32
-	go.olapie.com/times v1.1.3
 	go.olapie.com/x v0.5.1
-	go.olapie.com/x/xsqlite v0.2.1
+	go.olapie.com/x/xsqlite v0.2.2
 )
 
 require (

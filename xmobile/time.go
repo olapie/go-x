@@ -2,28 +2,26 @@ package xmobile
 
 import (
 	"fmt"
-
-	"go.olapie.com/times"
 )
 
 func GetDateTimeString(t int64) string {
-	tm := times.TimeWithUnix(t)
+	tm := xtime.TimeWithUnix(t)
 	return tm.Date().PrettyText() + " " + tm.TimeTextWithZero()
 }
 
 func GetRelativeDateTimeString(t int64) string {
-	tm := times.TimeWithUnix(t)
+	tm := xtime.TimeWithUnix(t)
 	return tm.RelativeDateTimeText()
 }
 
-type Time = times.Time
+type Time = xtime.Time
 
 func NowTime() *Time {
-	return (*Time)(times.NewTime())
+	return (*Time)(xtime.NewTime())
 }
 
 func TimeWithUnix(seconds int64) *Time {
-	return times.TimeWithUnix(seconds)
+	return xtime.TimeWithUnix(seconds)
 }
 
 func TimerText(elapse int64) string {

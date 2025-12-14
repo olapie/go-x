@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"go.olapie.com/times"
+	"go.olapie.com/x/xtime"
 	"go.olapie.com/x/xurl"
 )
 
@@ -19,7 +19,7 @@ func IsURL(s string) bool {
 }
 
 func IsDate(s string) bool {
-	return times.IsDate(s)
+	return xtime.IsDate(s)
 }
 
 var (

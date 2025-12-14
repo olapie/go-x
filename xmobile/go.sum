@@ -20,12 +20,10 @@ github.com/ncruces/go-strftime v1.0.0 h1:HMFp8mLCTPp341M/ZnA4qaf7ZlsbTc+miZjCLOF
 github.com/ncruces/go-strftime v1.0.0/go.mod h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=
 github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec h1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=
 github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=
-go.olapie.com/times v1.1.3 h1:c/B0hv0mUcsQPQYkJzmez6rzN+pkHB9EHBZq8IUnAk0=
-go.olapie.com/times v1.1.3/go.mod h1:lD9DJfGzGvc9CzFJZ4JNu5+j/ZAOrvI9f81/95QI/6Y=
 go.olapie.com/x v0.5.1 h1:i2stfEhHJ4fI0Du8AbvjZg6c8hZwcjT8Ne0uCo6YQyU=
 go.olapie.com/x v0.5.1/go.mod h1:K0XVt7mc8cfAbGIsYBAFJHLBrWuNzGDl1YqKH9ehVUc=
-go.olapie.com/x/xsqlite v0.2.1 h1:OqaAcERgao/hcaRlYt3TvoisMZNhgGkwWS8iJYGRFkc=
-go.olapie.com/x/xsqlite v0.2.1/go.mod h1:qk8oIR9ftjb/XQiW3m2gCLtkmLeAw0wPtx+BtuiOlOg=
+go.olapie.com/x/xsqlite v0.2.2 h1:6lOf1DW8hQI8R88d5eUm5jsi/AmcyhP1sKEmSDW/uZA=
+go.olapie.com/x/xsqlite v0.2.2/go.mod h1:sS9DL+bjwbEZbUAvtPGqr8D4jQrABSy5ZNsGKaWLAPo=
 golang.org/x/crypto v0.46.0 h1:cKRW/pmt1pKAfetfu+RCEvjvZkA9RimPbh7bhFjGVBU=
 golang.org/x/crypto v0.46.0/go.mod h1:Evb/oLKmMraqjZ2iQTwDwvCtJkczlDuTmdJXoZVzqU0=
 golang.org/x/exp v0.0.0-20251209150349-8475f28825e9 h1:MDfG8Cvcqlt9XXrmEiD4epKn7VJHZO84hejP9Jmp0MM=
