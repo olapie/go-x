@@ -13,7 +13,6 @@ import (
 	"go.olapie.com/x/xsecurity"
 
 	lru "github.com/hashicorp/golang-lru/v2"
-	"go.olapie.com/times"
 )
 
 const (
@@ -22,7 +21,7 @@ const (
 )
 
 type LocalTableOptions[R any] struct {
-	Clock             times.Clock
+	Clock             xtime.Clock
 	MarshalFunc       func(r R) ([]byte, error)
 	UnmarshalFunc     func(data []byte, r *R) error
 	Password          string
@@ -53,7 +52,7 @@ func NewLocalTable[R any](db *sql.DB, optFns ...func(*LocalTableOptions[R])) *Lo
 	}
 
 	if t.options.Clock == nil {
-		t.options.Clock = times.LocalClock{}
+		t.options.Clock = xtime.LocalClock{}
 	}
 
 	if t.options.LocalCacheSize < minimumLocalTableCacheSize {

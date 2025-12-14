@@ -6,6 +6,8 @@ import (
 	"log"
 	"reflect"
 	"sync"
+
+	"go.olapie.com/x/xname"
 )
 
 var initNameToPrototypeOnce sync.Once

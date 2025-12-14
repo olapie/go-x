@@ -7,12 +7,11 @@ import (
 	"strings"
 	"sync"
 
-	"go.olapie.com/times"
 	"go.olapie.com/x/xconv"
 )
 
 type KVTableOptions struct {
-	Clock times.Clock
+	Clock xtime.Clock
 }
 
 type KVTable struct {
@@ -37,7 +36,7 @@ func NewKVTable(db *sql.DB, name string, optFns ...func(options *KVTableOptions)
 	}
 
 	if r.options.Clock == nil {
-		r.options.Clock = times.LocalClock{}
+		r.options.Clock = xtime.LocalClock{}
 	}
 
 	_, err := db.Exec(fmt.Sprintf(`

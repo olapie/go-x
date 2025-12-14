@@ -7,13 +7,12 @@ import (
 	"reflect"
 	"sync"
 
-	"go.olapie.com/times"
 	"go.olapie.com/x/xsecurity"
 	"go.olapie.com/x/xsql"
 )
 
 type SimpleTableOptions[K SimpleKey, R any] struct {
-	Clock         times.Clock
+	Clock         xtime.Clock
 	MarshalFunc   func(r R) ([]byte, error)
 	UnmarshalFunc func(data []byte, r *R) error
 	Password      string
@@ -74,7 +73,7 @@ updated_at BIGINT
 	}
 
 	if t.options.Clock == nil {
-		t.options.Clock = times.LocalClock{}
+		t.options.Clock = xtime.LocalClock{}
 	}
 
 	t.stmts.insert = xsql.MustPrepare(db, `INSERT INTO %s(id,data,updated_at) VALUES(?,?,?)`, name)

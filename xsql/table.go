@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"go.olapie.com/x/xname"
 	"go.olapie.com/x/xreflect"
 )
 

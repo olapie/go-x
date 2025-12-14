@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 	"unsafe"
+	
+	"go.olapie.com/x/xname"
 )
 
 var _regexpVariable = regexp.MustCompile("^[_a-zA-Z]\\w*$")
