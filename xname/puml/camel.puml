@@ -1,0 +1,41 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+scale 600 width
+
+state CamelCase {
+  [*] --> Start :  ε
+
+  Start --> Start : delimiters
+  Start --> FirstUpper : uppercase
+  Start --> Lower : lowercase
+
+
+  FirstUpper --> FirstWordEnd : delimiters
+  FirstUpper --> Lower : lowercase
+  FirstUpper --> SecondUpper : uppercase
+
+  Lower --> FirstWordEnd : delimiters
+  Lower --> Lower : lowercase
+  Lower --> FirstWordEnd : uppercase
+
+
+  SecondUpper --> FirstWordEnd : delimiters
+  SecondUpper --> Lower : lowercase
+  SecondUpper --> UpperWord : uppercase
+
+  UpperWord --> FirstWordEnd : delimiters
+  UpperWord --> UpperWordEnd : lowercase
+  UpperWord --> Lower : lowercase ignoring acronym
+  UpperWord --> UpperWord : uppercase
+
+  UpperWordEnd --> FirstWordEnd : ε
+  FirstWordEnd --> PascalState : ε
+
+  PascalState --> [*]
+
+  UpperWordEnd : check acronym without the last char
+  FirstWordEnd : convert into lowercase
+}
+
+@enduml

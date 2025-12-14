@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"strings"
 
-	"go.olapie.com/naming"
 	"go.olapie.com/x/xreflect"
 )
 
@@ -58,7 +57,7 @@ func getTableNameByType(typ reflect.Type) string {
 		//return reflect.Zero(reflect.PtrTo(typ)).Interface().(tableNamer).TableName()
 	}
 
-	return naming.Plural(naming.ToSnake(typ.Name()))
+	return xname.Plural(xname.ToSnake(typ.Name()))
 }
 
 type Table struct {

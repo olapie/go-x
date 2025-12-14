@@ -6,8 +6,6 @@ import (
 	"log"
 	"reflect"
 	"sync"
-
-	"go.olapie.com/naming"
 )
 
 var initNameToPrototypeOnce sync.Once
@@ -69,7 +67,7 @@ func getAnyTypeName(prototype any) string {
 	for p.Kind() == reflect.Ptr {
 		p = p.Elem()
 	}
-	return naming.ToSnake(p.Name())
+	return xname.ToSnake(p.Name())
 }
 
 func getProtoType(typ string) (reflect.Type, bool) {

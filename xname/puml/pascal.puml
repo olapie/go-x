@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+scale 600 width
+state PascalCase {
+  [*] --> Start :  ε
+
+  Start --> Start : delimiters
+  Start --> Lower : lowercase
+  Start --> Upper : uppercase
+  Start --> [*] : EOL
+
+  Lower --> LowerWordEnd : delimiters
+  Lower --> Lower : lowercase
+  Lower --> UpperStart : uppercase
+  Lower --> LastLowerWordEnd : end
+
+  Upper --> Start : delimiters
+  Upper --> Upper : letters
+  Upper --> [*] : end
+
+  LowerWordEnd --> Start : ε
+  LowerWordEnd : convert to acronym
+
+  LastLowerWordEnd : convert to acronym
+  LastLowerWordEnd --> [*] : ε
+
+  UpperStart : convert to acronym
+  UpperStart --> Upper : ε
+}
+@enduml
