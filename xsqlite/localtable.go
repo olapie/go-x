@@ -355,7 +355,7 @@ func (t *LocalTable[R]) BatchGetRemotes(ctx context.Context, localIDs ...string)
 	if len(localIDs) == 0 {
 		return nil, nil
 	}
-	condition, args := t.getCatchIDsCondition(localIDs...)
+	condition, args := t.getBatchIDsCondition(localIDs...)
 	_, l, err := t.list(ctx, "remotes", "id IN "+condition, args...)
 	return l, err
 }
@@ -364,7 +364,7 @@ func (t *LocalTable[R]) BatchGetLocals(ctx context.Context, localIDs ...string) 
 	if len(localIDs) == 0 {
 		return nil, nil
 	}
-	condition, args := t.getCatchIDsCondition(localIDs...)
+	condition, args := t.getBatchIDsCondition(localIDs...)
 	_, l, err := t.list(ctx, "locals", "id IN "+condition, args...)
 	return l, err
 }
@@ -373,7 +373,7 @@ func (t *LocalTable[R]) RemoveDeletions(ctx context.Context, localIDs ...string)
 	if len(localIDs) == 0 {
 		return nil
 	}
-	condition, args := t.getCatchIDsCondition(localIDs...)
+	condition, args := t.getBatchIDsCondition(localIDs...)
 	_, err := t.db.ExecContext(ctx, `DELETE FROM deletions WHERE id IN `+condition, args...)
 	if err != nil {
 		return fmt.Errorf("remove deletionss: %w", err)
@@ -651,7 +651,7 @@ func (t *LocalTable[R]) decode(localID string, data []byte) (record R, err error
 	return record, err
 }
 
-func (t *LocalTable[R]) getCatchIDsCondition(ids ...string) (string, []any) {
+func (t *LocalTable[R]) getBatchIDsCondition(ids ...string) (string, []any) {
 	if len(ids) == 0 {
 		return "", nil
 	}
